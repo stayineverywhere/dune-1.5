@@ -26,5 +26,11 @@
     <ClCompile Include="engine.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="inouttro.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="display.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

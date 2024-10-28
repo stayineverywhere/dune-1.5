@@ -130,8 +130,10 @@
     <ClInclude Include="dune.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="display.c" />
     <ClCompile Include="engine.c" />
     <ClCompile Include="getkey.c" />
+    <ClCompile Include="inouttro.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

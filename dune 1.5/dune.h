@@ -58,3 +58,22 @@ typedef struct _objects {
 	int layer;
 	OBJECT* obj;
 } OBJECT_POOL;
+
+//
+// color table
+
+#define FG_BLACK	0
+#define FG_BLUE		1
+
+
+#define BG_BLUE		(1<<4)
+#define BG_YELLOW	(14<<4)
+
+// display.c
+extern HANDLE hStdOut, hHiddenBuffer;
+extern COORD screenSize;
+
+// inouttro.c
+
+extern void Intro();
+extern void Outtro();
