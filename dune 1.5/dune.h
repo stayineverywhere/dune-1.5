@@ -125,6 +125,9 @@ extern void clearConsole();
 extern void initBuffers();
 extern void flushBuffer();
 
+// resource.c
+extern void display_resource(RESOURCE resource);
+
 // cursor.c
 
 extern void init_cursor(CURSOR* cursor);

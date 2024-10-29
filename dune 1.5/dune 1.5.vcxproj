@@ -135,6 +135,7 @@
     <ClCompile Include="engine.c" />
     <ClCompile Include="getkey.c" />
     <ClCompile Include="inouttro.c" />
+    <ClCompile Include="resource.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
