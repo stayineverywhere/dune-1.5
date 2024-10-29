@@ -64,10 +64,37 @@ typedef struct _objects {
 
 #define FG_BLACK	0
 #define FG_BLUE		1
+#define FG_GRREN	2
+#define FG_CYAN		3	// AQUA
+#define FG_RED		4
+#define FG_MAGENTA	5	// MAGENTA
+#define FG_BROWN	6
+#define FG_LIGHTGRAY	7
+#define FG_DARKGRAY	8
+#define FG_LIGHTBLUE	9
+#define FG_LIGHTGREEN	10
+#define FG_LIGHTCYAN	11
+#define FG_LIGHTRED	12
+#define FG_PINK		13
+#define FG_YELLOW	14
+#define FG_WHITE	15
 
-
+#define BG_BLACK	0
 #define BG_BLUE		(1<<4)
+#define BG_GRREN	(2<<4)
+#define BG_CYAN		(3<<4)	// AQUA
+#define BG_RED		(4<<4)
+#define BG_MAGENTA	(5<<4)	// MAGENTA
+#define BG_BROWN	(6<<4)
+#define BG_LIGHTGRAY	(7<<4)
+#define BG_DARKGRAY	(8<<4)
+#define BG_LIGHTBLUE	(9<<4)
+#define BG_LIGHTGREEN	(10<<4)
+#define BG_LIGHTCYAN	(11<<4)
+#define BG_LIGHTRED	(12<<4)
+#define BG_PINK		(13<<4)
 #define BG_YELLOW	(14<<4)
+#define BG_WHITE	(15<<4)
 
 // display.c
 
