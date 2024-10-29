@@ -130,6 +130,7 @@
     <ClInclude Include="dune.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cursor.c" />
     <ClCompile Include="display.c" />
     <ClCompile Include="engine.c" />
     <ClCompile Include="getkey.c" />

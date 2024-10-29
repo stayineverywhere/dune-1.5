@@ -70,6 +70,7 @@ typedef struct _objects {
 #define BG_YELLOW	(14<<4)
 
 // display.c
+
 extern HANDLE hStdOut, hHiddenBuffer;
 extern COORD screenSize;
 extern CHAR_INFO* frameData;
@@ -97,6 +98,13 @@ extern void clearConsole();
 extern void initBuffers();
 extern void flushBuffer();
 
+// cursor.c
+
+extern void init_cursor(CURSOR* cursor);
+extern void increase_cursor_size(CURSOR* cursor);
+extern void decrease_cursor_size(CURSOR* cursor);
+extern void display_cursor(CURSOR cursor);
+extern void move_cursor(CURSOR* cursor, KEY key, int diff);
 
 // inouttro.c
 
