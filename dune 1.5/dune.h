@@ -72,6 +72,31 @@ typedef struct _objects {
 // display.c
 extern HANDLE hStdOut, hHiddenBuffer;
 extern COORD screenSize;
+extern CHAR_INFO* frameData;
+extern SMALL_RECT rectResourceMesg, rectMap, rectSysMesg, rectStatusMsg, rectCommand;
+
+extern void cursorOff();
+extern void cursorOn();
+extern void _gotoXY(HANDLE handle, int x, int y);
+extern void gotoXY(int x, int y);
+extern CHAR_INFO _getCharXY(HANDLE handle, int x, int y);
+extern CHAR_INFO getCharXY(int x, int y);
+extern void _putCharXY(HANDLE handle, int x, int y, wchar_t ch);
+extern void putCharXY(int x, int y, wchar_t ch);
+extern void _putStringXY(HANDLE handle, int x, int y, char* str);
+extern void putStringXY(int x, int y, char* str);
+extern void init_parameters();
+extern void display(RESOURCE resource, char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], CURSOR cursor, int selectedObj);
+extern WORD _getTextAttribute();
+extern WORD getTextAttribute();
+extern WORD _setTextAttribute(WORD wAttribute);
+extern WORD setTextAttribute(WORD wAttribute);
+extern void clearBuffer();
+extern void fillLine(int x, int y, int length, wchar_t ch, WORD attr);
+extern void clearConsole();
+extern void initBuffers();
+extern void flushBuffer();
+
 
 // inouttro.c
 
