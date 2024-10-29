@@ -128,6 +128,13 @@ extern void flushBuffer();
 // resource.c
 extern void display_resource(RESOURCE resource);
 
+// systemessage.c
+extern void add_system_fmessage(char* mesg, ...);
+
+extern void add_system_message(char* mesg);
+extern void display_system_message();
+
+
 // cursor.c
 
 extern void init_cursor(CURSOR* cursor);
