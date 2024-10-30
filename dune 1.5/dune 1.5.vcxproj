@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dune.h" />
+    <ClInclude Include="object.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cursor.c" />
@@ -135,6 +136,7 @@
     <ClCompile Include="engine.c" />
     <ClCompile Include="getkey.c" />
     <ClCompile Include="inouttro.c" />
+    <ClCompile Include="map.c" />
     <ClCompile Include="resource.c" />
     <ClCompile Include="systemessage.c" />
   </ItemGroup>

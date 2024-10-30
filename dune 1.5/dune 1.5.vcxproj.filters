@@ -18,6 +18,9 @@
     <ClInclude Include="dune.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="object.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="getkey.c">
@@ -39,6 +42,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="systemessage.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="map.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
