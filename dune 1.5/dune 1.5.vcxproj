@@ -137,6 +137,8 @@
     <ClCompile Include="getkey.c" />
     <ClCompile Include="inouttro.c" />
     <ClCompile Include="map.c" />
+    <ClCompile Include="objectinfo.c" />
+    <ClCompile Include="objects.c" />
     <ClCompile Include="resource.c" />
     <ClCompile Include="systemessage.c" />
   </ItemGroup>

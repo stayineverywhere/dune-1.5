@@ -134,6 +134,12 @@ extern void add_system_fmessage(char* mesg, ...);
 extern void add_system_message(char* mesg);
 extern void display_system_message();
 
+// objectinfo.c
+extern void display_status(int selObj);
+extern void display_command(int selObj);
+extern void display_desert_information();
+
+extern void clear_messages();
 
 // cursor.c
 
@@ -142,6 +148,20 @@ extern void increase_cursor_size(CURSOR* cursor);
 extern void decrease_cursor_size(CURSOR* cursor);
 extern void display_cursor(CURSOR cursor);
 extern void move_cursor(CURSOR* cursor, KEY key, int diff);
+
+// map.c
+extern void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+
+extern void init_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+
+extern void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+
+extern int nobject;
+extern OBJECT_POOL objectPool[MAX_OBJECT];
+
+// objects.c
+extern int check_object_select(POSITION pos);
+extern void object_move();
 
 // inouttro.c
 
