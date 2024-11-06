@@ -6,7 +6,8 @@
 #define N_LAYER 2
 #define MAP_WIDTH 80
 #define MAP_HEIGHT 18
-#define MAX_OBJECT 20
+#define MAX_OBJECT 100
+#define MAX_POOL_SIZE 1000
 
 #define TICK 10
 
@@ -160,6 +161,13 @@ extern int nobject;
 extern OBJECT_POOL objectPool[MAX_OBJECT];
 
 // objects.c
+extern int nobject;
+extern OBJECT_POOL objectPool[MAX_POOL_SIZE];
+OBJECT* copy_object(OBJECT* src);
+
+extern void add_object(int layer, OBJECT* obj);
+extern void free_objectPool();
+
 extern int check_object_select(POSITION pos);
 extern void object_move();
 
