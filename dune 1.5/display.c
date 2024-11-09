@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include "dune.h"
 
+/*
+ * Double Buffering은 윈도우즈에서 지원하는 Console API를 사용하여 구현함.
+ * 화면에 보이는 ConsoleBuffer는 hStdOut이며, 화면에 보이지 않는 ConsoleBuffer를 hHiddenBuffer로 생성하여
+ * 커서를 제외한 화면 작업은 모두 hHiddenBuffer에서 진행하고, 명령 처리후에는 hHiddenBuffer의 내용을 hStdOut으로 복사함
+ * 화면의 깜박임을 줄이기 위하여 두 화면 버퍼의 내용을 비교하여, 변경된 경우에만 복사함
+ * 윈도우즈의 Console API를 사용하였기 때문에, 화면에 출력하는 별도의 버퍼를 이용하지 않고, 자연스러운 화면 출력을 얻을 수 있음
+ * 참고문헌:
+ * 1. https://stackoverflow.com/questions/34842526/update-console-without-flickering-c
+ * 2. https://learn.microsoft.com/ko-kr/windows/console/reading-and-writing-blocks-of-characters-and-attributes
+ */
+
 HANDLE hStdOut, hHiddenBuffer;
 COORD screenSize;
 // 화면 비교를 위한 문자 정보 배열, 화면의 크기를 알수 없기 때문에 동적 메모리 할당 이용
