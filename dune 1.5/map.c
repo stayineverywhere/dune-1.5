@@ -1,24 +1,6 @@
 #include "dune.h"
 #include "object.h"
 
-int nobject = 0;
-OBJECT_POOL objectPool[MAX_OBJECT];
-
-// object pool에 object 들을 추가함
-// layer별로 선언된 object를 추가함
-void add_object(int layer, OBJECT* obj)
-{
-	// object전체를 저장
-	if (nobject >= MAX_OBJECT) {
-		add_system_message("Object pool is full.");
-		add_system_message("MAX_OBJECT를 증가해야 합니다.");
-		return;
-	}
-	objectPool[nobject].layer = layer;
-	objectPool[nobject++].obj = obj;
-
-}
-
 // 추가된 object 들을 map 위에 놓음.
 void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 {
@@ -34,6 +16,13 @@ void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 			map[l][r][c + 1] = obj->repr;
 			map[l][r + 1][c + 1] = obj->repr;
 		}
+		//worm의 꼬리를 증가시킴
+		else if (obj->repr == 'W' && obj->nblock > 0) {
+			for (int i = 0; i < obj->nblock; i++) {
+				int r = obj->block[i].row, c = obj->block[i].column;
+				map[l][r][c] = 'w';
+			}
+		}
 	}
 
 }
@@ -42,19 +31,19 @@ void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 // 동적으로 추가되는 object는 objects에서 추가합니다.
 void init_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 {
-	add_object(0, &user_base);
-	add_object(0, &ai_base);
+	add_object(0, copy_object(& user_base));
+	add_object(0, copy_object(&ai_base));
 	for (int o = 0; o < sizeof(plates) / sizeof(plates[0]); o++)
-		add_object(0, &plates[o]);
+		add_object(0, copy_object(&plates[o]));
 	for (int o = 0; o < sizeof(spices) / sizeof(spices[0]); o++)
-		add_object(0, &spices[0]);
+		add_object(0, copy_object(&spices[0]));
 	for (int o = 0; o < sizeof(rocks) / sizeof(rocks[0]); o++)
-		add_object(0, &rocks[o]);
+		add_object(0, copy_object(&rocks[o]));
 
-	add_object(1, &user_harvester);
-	add_object(1, &ai_harvester);
+	add_object(1, copy_object(&user_harvester));
+	add_object(1, copy_object(&ai_harvester));
 	for (int o = 0; o < sizeof(sandWorms) / sizeof(sandWorms[0]); o++)
-		add_object(1, &sandWorms[o]);
+		add_object(1, copy_object(&units[o]));
 
 	put_object(map);
 }
@@ -76,7 +65,10 @@ WORD setObjectColor(char repr)
 	case 'R':
 		color = FG_BLACK | BG_DARKGRAY;
 		break;
-	case 'W':
+	case 'w':	// SandWorm 꼬리
+		color = FG_YELLOW | BG_BROWN;
+		break;
+	case 'W':   //SandWorm 머리
 		color = FG_WHITE | BG_BROWN;
 		break;
 	case 'P':

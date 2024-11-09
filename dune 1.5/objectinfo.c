@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include "dune.h"
 
-#define MAX_OBJECT 20
 #define MAX_MESG_LINE 1024
 
-enum object_id { obj_desert, obj_harvest, obj_base, obj_plate, obj_rock, obj_spice };
+enum object_id { obj_desert, obj_harvest, obj_base, obj_plate, obj_rock, obj_spice,
+	             obj_soldier, obj_fremen, obj_fighter, obj_tank
+};
 char objInformation[MAX_OBJECT][MAX_MESG_LINE] = {
 	"사막정보가 출력됩니다.\n현재는 어떤것을 출력하는지 모르겠어요.",
 	"하베스터는\nspice를 채굴하거나 이동합니다.\n생산비용: 5, 인구수: 5\n이동주기: 2초\n공격력, 공격주기: 없음\n체력: 70, 시야:0", // harvest
@@ -13,6 +14,9 @@ char objInformation[MAX_OBJECT][MAX_MESG_LINE] = {
 char objCommand[MAX_OBJECT][MAX_MESG_LINE] = {
 	"",
 	"H: Harvest, M: Move", // harvest 명령어
+};
+char objName[MAX_OBJECT][20] = {
+	"사막", "하베스터", "기지", "장판", "암석", "스파이스", "군인", "프레멘", "전투사", "탱크"
 };
 
 // 객체 정보(문자)로부터 공동된 객체 정보를 출력하도록 관련 인덱스(enum)를 반환합니다.
@@ -31,9 +35,23 @@ int convert_repr2object(char repr)
 	case '0': case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
 		return obj_spice;
-	}
+	case 'S':
+		return obj_soldier;
+	case 'M':
+		return obj_fremen;
+	case 'F':
+		return obj_fighter;
+	case 'T':
+		return obj_tank;
+    }
 	return obj_desert;
 }
+
+char* get_object_name(char repr)
+{
+	return objName[convert_repr2object(repr)];
+}
+
 
 // object 창 또는 상태 창에 object 관련된 정보를 출력한다.
 // 시스템 창은 내용이 추가되며, 스크롤이 되지만, object 창은 항상 새로 쓰기 때문에

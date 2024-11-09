@@ -15,9 +15,11 @@ OBJECT spices[] = {
 	{{ MAP_HEIGHT - 6, 0}, {0, 0}, 1, '5', -1, -1},
 	{{4, MAP_WIDTH - 1}, {0, 0}, 1, '5', -1, -1}
 };
+
+#define WORM_PERIOD 25
 OBJECT sandWorms[] = {
-	{{1, 3}, {0, 0}, 1, 'W', 250, 250},
-	{{MAP_HEIGHT - 4, MAP_WIDTH - 6}, {0, 0}, 1, 'W', 250, 250}
+	{{1, 3}, {0, 0}, 1, 'W', WORM_PERIOD, WORM_PERIOD},
+	{{MAP_HEIGHT - 4, MAP_WIDTH - 6}, {0, 0}, 1, 'W', WORM_PERIOD, WORM_PERIOD}
 };
 
 OBJECT rocks[] = {

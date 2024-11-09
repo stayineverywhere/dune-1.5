@@ -84,6 +84,7 @@ int main() {
     // 종료화면
     Outtro();
     cursorOn();
+    free_objectPool();
 
     return 0;
 }
