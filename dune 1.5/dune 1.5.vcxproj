@@ -143,6 +143,9 @@
     <ClCompile Include="resource.c" />
     <ClCompile Include="systemessage.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
