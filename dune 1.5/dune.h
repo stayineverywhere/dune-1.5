@@ -9,6 +9,7 @@
 #define MAX_OBJECT 100
 #define MAX_POOL_SIZE 1000
 
+#define RESET_OBJECT	-100
 #define TICK 10
 
 extern char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH];
@@ -44,13 +45,38 @@ typedef struct {
 	int population_max; // 수용 가능한 인구 수
 } RESOURCE;
 
+typedef enum { NEUTRAL, USER, AI } USER_TYPE;
+typedef enum {
+	NONE, BASE, SPICE, PLATE, ROCK, DORMITORY, GARAGE, BARRACKS, SHELTER, ARENA, FACTORY,
+	HARVESTER, FREMEN, SOLDIER, FIGHTER, TANK, SANDWORM, SANDEAGLE, SANDSTORM
+} UNIT_TYPE;
+
+typedef enum {
+	c_none,
+	c_prod_harvestor, c_prod_soldier, c_prod_fremen, c_prod_fighter, c_produce_tank,
+	c_harvest, c_move, c_patrol
+} COMMAND_TYPE;
+
+
 typedef struct {
+	USER_TYPE type;			// 사용자 또는 AI, 문자로 구분하기 어려울때를 위하여 미리 할당
+	UNIT_TYPE unit;
 	POSITION pos;		// 현재 위치 (position)
 	POSITION dest;		// 목적지 (destination)
+	COMMAND_TYPE cmd; 
+
 	int size;			// 크기
-	char repr;			// 화면에 표시할 문자 (representation)
+	char repr;	// 화면에 표시할 문자 (representation)
+	int consumed_time;		// 건물에서 unit을 생성하는데 걸리는 시간, unit 마다 생성 시간이 다름
 	int  move_period;	// 몇 ms 마다 한 칸 움직이는지 를 뜻함
 	int  next_move_time;	// 다음에 움직일 시간
+	int cost;				// 건설/생산 비용
+	int population;			// 인구수
+	int attack_power;		// 공격력
+	int attack_period;		// 공격주기
+	int strength;			// 체력/내구도
+	int vision;				// 시야
+
 	int nblock;			// sand word의 경우, block수가 증가할 수 있음. 그때 사용
 	POSITION* block;
 } OBJECT;
@@ -136,11 +162,16 @@ extern void add_system_message(char* mesg);
 extern void display_system_message();
 
 // objectinfo.c
+char* get_object_name(char repr);
+
 extern void display_status(int selObj);
 extern void display_command(int selObj);
 extern void display_desert_information();
 
 extern void clear_messages();
+
+// key.c
+extern KEY get_key();
 
 // cursor.c
 
@@ -157,9 +188,6 @@ extern void init_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 
 extern void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 
-extern int nobject;
-extern OBJECT_POOL objectPool[MAX_OBJECT];
-
 // objects.c
 extern int nobject;
 extern OBJECT_POOL objectPool[MAX_POOL_SIZE];
@@ -175,3 +203,8 @@ extern void object_move();
 
 extern void Intro();
 extern void Outtro();
+
+// objcmd.c
+extern COMMAND_TYPE fetch_command(int selected, KEY key);
+extern void invoke_command(COMMAND_TYPE cmd, int selected);
+extern void execute_command();

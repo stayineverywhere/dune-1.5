@@ -137,6 +137,7 @@
     <ClCompile Include="getkey.c" />
     <ClCompile Include="inouttro.c" />
     <ClCompile Include="map.c" />
+    <ClCompile Include="objectcmd.c" />
     <ClCompile Include="objectinfo.c" />
     <ClCompile Include="objects.c" />
     <ClCompile Include="resource.c" />

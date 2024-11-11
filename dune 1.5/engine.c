@@ -5,7 +5,8 @@ char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
 RESOURCE resource = { 0 };
 CURSOR cursor = { 0 };
 int clock = 0, prev_clock = -1000;
-int selected = -1;
+int selected = RESET_OBJECT;
+COMMAND_TYPE command = c_none;
 
 int main() {
     KEY oldKey = k_none;
@@ -22,6 +23,11 @@ int main() {
 
     add_system_message("프로그램을 시작합니다.");
     add_system_message("Dune Game programmed by Jooyoung Yun, 2024/11/05");
+
+    resource.population_max = 300; // 초기 최대 인구 수
+    resource.spice_max = 100;
+    add_system_fmessage("최대 스파이스 저장량은 %d으로 설정되었습니다.", resource.spice_max);
+    add_system_fmessage("최대 인구 수는 %d으로 설정되었습니다.", resource.population_max);
 
     init_map(map);
     init_cursor(&cursor);
