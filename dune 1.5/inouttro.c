@@ -18,19 +18,20 @@ void show_image(char image[][75], int image_h, int image_w)
             sy = k + i;;
             for (int j = 0; j < image_w && image[k][j] != '\0'; j++) {
                 if (image[sy][j] == '.')
-                    _setTextAttribute(FG_BLUE | BG_BLUE);
-                _putCharXY(hStdOut, cx + j, cy + i, image[sy][j]);
-                _setTextAttribute(wAttr);
+                    setTextAttribute(FG_BLUE | BG_BLUE);
+                putCharXY(cx + j, cy + i, image[sy][j]);
+                setTextAttribute(wAttr);
             }
         }
         if (k == 0) Sleep(500);
         else Sleep(10);
+        flushBuffer();
     }
 
-    _setTextAttribute(FG_BLACK | BG_YELLOW);
-    _putStringXY(hStdOut, cx + 13, cy + 25, "Programmed by À±ÁÖ¿µ(JooYoung Yun), ÇÐ¹ø: 20232532");
-    _setTextAttribute(wAttr);
-    Sleep(500);
+    setTextAttribute(FG_BLACK | BG_YELLOW);
+    putStringXY(cx + 13, cy + 25, "Programmed by À±ÁÖ¿µ(JooYoung Yun), ÇÐ¹ø: 20232532");
+    setTextAttribute(wAttr);
+    flushBuffer();
 
 }
 void Intro()
@@ -110,7 +111,7 @@ void Intro()
 "==========--======---------=**+=*==-=@%%##%#%%=%%=*#=#*%+=======--=========",
 "======-=--======-----=--==-%+--=+=*-=#@@##%#%%*%##=**---*#==-==----========",
     };
-    clearConsole();
+    clearBuffer(); flushBuffer();
 
     int intro_h, intro_w;
     intro_w = sizeof(intro[0]);
@@ -118,8 +119,9 @@ void Intro()
 
     show_image(intro, intro_h, intro_w);
 
-    Sleep(500);
-    clearConsole();
+    Sleep(1000);
+    clearBuffer();
+    flushBuffer();
 }
 
 void Outtro()
@@ -152,7 +154,9 @@ void Outtro()
     outtro_w = sizeof(outtro[0]);
     outtro_h = sizeof(outtro) / outtro_w;
 
+    clearBuffer(); flushBuffer();
     show_image(outtro, outtro_h, outtro_w);
     Sleep(1000);
-    clearConsole();
+    clearBuffer();
+    flushBuffer();
 }

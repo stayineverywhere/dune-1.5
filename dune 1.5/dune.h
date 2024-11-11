@@ -3,11 +3,11 @@
 #include <Windows.h>
 #include <conio.h>
 
-#define N_LAYER 2
-#define MAP_WIDTH 80
-#define MAP_HEIGHT 18
-#define MAX_OBJECT 100
-#define MAX_POOL_SIZE 1000
+#define N_LAYER			3
+#define MAP_WIDTH		80
+#define MAP_HEIGHT		18
+#define MAX_OBJECT		100
+#define MAX_POOL_SIZE	1000
 
 #define RESET_OBJECT	-100
 #define TICK 10
@@ -57,18 +57,17 @@ typedef enum {
 	c_harvest, c_move, c_patrol
 } COMMAND_TYPE;
 
-
 typedef struct {
 	USER_TYPE type;			// 사용자 또는 AI, 문자로 구분하기 어려울때를 위하여 미리 할당
 	UNIT_TYPE unit;
-	POSITION pos;		// 현재 위치 (position)
-	POSITION dest;		// 목적지 (destination)
-	COMMAND_TYPE cmd; 
+	POSITION pos;			// 현재 위치 (position)
+	POSITION dest;			// 목적지 (destination)
+	COMMAND_TYPE cmd;
 
-	int size;			// 크기
-	char repr;	// 화면에 표시할 문자 (representation)
+	int size;				// 크기
+	char repr;				// 화면에 표시할 문자 (representation)
 	int consumed_time;		// 건물에서 unit을 생성하는데 걸리는 시간, unit 마다 생성 시간이 다름
-	int  move_period;	// 몇 ms 마다 한 칸 움직이는지 를 뜻함
+	int  move_period;		// 몇 ms 마다 한 칸 움직이는지 를 뜻함
 	int  next_move_time;	// 다음에 움직일 시간
 	int cost;				// 건설/생산 비용
 	int population;			// 인구수
@@ -88,7 +87,6 @@ typedef struct _objects {
 
 //
 // color table
-
 #define FG_BLACK	0
 #define FG_BLUE		1
 #define FG_GRREN	2
@@ -123,12 +121,13 @@ typedef struct _objects {
 #define BG_YELLOW	(14<<4)
 #define BG_WHITE	(15<<4)
 
-// display.c
 
+// display.c
 extern HANDLE hStdOut, hHiddenBuffer;
 extern COORD screenSize;
 extern CHAR_INFO* frameData;
 extern SMALL_RECT rectResourceMesg, rectMap, rectSysMesg, rectStatusMsg, rectCommand;
+
 
 extern void cursorOff();
 extern void cursorOn();
@@ -141,7 +140,7 @@ extern void putCharXY(int x, int y, wchar_t ch);
 extern void _putStringXY(HANDLE handle, int x, int y, char* str);
 extern void putStringXY(int x, int y, char* str);
 extern void init_parameters();
-extern void display(RESOURCE resource, char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], CURSOR cursor, int selectedObj);
+extern void display(RESOURCE resource, char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], CURSOR cursor, int selectedObj, int clock);
 extern WORD _getTextAttribute();
 extern WORD getTextAttribute();
 extern WORD _setTextAttribute(WORD wAttribute);
@@ -155,13 +154,13 @@ extern void flushBuffer();
 // resource.c
 extern void display_resource(RESOURCE resource);
 
-// systemessage.c
+// sysmesg.c
 extern void add_system_fmessage(char* mesg, ...);
 
 extern void add_system_message(char* mesg);
 extern void display_system_message();
 
-// objectinfo.c
+// objinfo.c
 char* get_object_name(char repr);
 
 extern void display_status(int selObj);
@@ -174,7 +173,6 @@ extern void clear_messages();
 extern KEY get_key();
 
 // cursor.c
-
 extern void init_cursor(CURSOR* cursor);
 extern void increase_cursor_size(CURSOR* cursor);
 extern void decrease_cursor_size(CURSOR* cursor);
@@ -194,10 +192,30 @@ extern OBJECT_POOL objectPool[MAX_POOL_SIZE];
 OBJECT* copy_object(OBJECT* src);
 
 extern void add_object(int layer, OBJECT* obj);
+extern void build_base(USER_TYPE type, POSITION pos);
+extern void build_plate(POSITION pos);
+
+extern void build_barracks(POSITION pos);
+extern void build_shelter(POSITION pos);
+extern void build_arena(POSITION pos);
+extern void build_factory(POSITION pos);
+extern int add_spice(POSITION pos, int reserves);
+extern void add_rock(POSITION pos, int size);
+extern void add_harvester(USER_TYPE type, POSITION pos);
+extern void add_worm(POSITION pos);
+extern void add_eagle(POSITION pos);
+extern void add_storm(POSITION pos);
+extern void add_soldier(POSITION pos);
+extern void add_fremen(POSITION pos);
+extern void add_fighter(POSITION pos);
+extern void add_tank(POSITION pos);
 extern void free_objectPool();
+
+extern WORD setObjectColor(char repr);
 
 extern int check_object_select(POSITION pos);
 extern void object_move();
+
 
 // inouttro.c
 

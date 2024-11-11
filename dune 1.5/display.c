@@ -250,7 +250,18 @@ int frameDataChanged(CHAR_INFO* frameBack, CHAR_INFO* frameData)
     return FALSE;
 }
 
-void display(RESOURCE resource, char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], CURSOR cursor, int selectedObj)
+void display_clock(int clock)
+{
+    int h, m, s;
+    h = clock / (3600000);
+    m = (clock - h * 3600000) / 60000;
+    s = (clock - h * 3600000 - m * 60000) / 1000;
+    char buf[50];
+    sprintf_s(buf, sizeof buf, "%02d:%02d:%02d", h, m, s);
+    putStringXY(rectMap.Right - 8, 0, buf);
+}
+
+void display(RESOURCE resource, char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], CURSOR cursor, int selectedObj, int clock)
 {
     // 각 윈도우의 경계를 출력
     for (int x = rectMap.Left - 1; x <= rectCommand.Right + 1; x++)
@@ -271,11 +282,12 @@ void display(RESOURCE resource, char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], CURSOR
     display_map(map);
     display_system_message();
     // if selected:
-    if (selectedObj != -1) {
-        display_status(selectedObj);
-        display_command(selectedObj);
-    }
+    display_status(selectedObj);
+    display_command(selectedObj);
     display_cursor(cursor);
+
+    // display_last_time
+    display_clock(clock);
 }
 
 // 숨겨진 내용 (버퍼)을 화면 버퍼로 전송하고 출력함
@@ -295,3 +307,5 @@ void flushBuffer()
         WriteConsoleOutput(hStdOut, frameData, coordBufferSize, coordScreen, &srcWriteRect);
     }
 }
+
+

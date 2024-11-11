@@ -8,7 +8,9 @@ int clock = 0, prev_clock = -1000;
 int selected = RESET_OBJECT;
 COMMAND_TYPE command = c_none;
 
-int main() {
+
+int main()
+{
     KEY oldKey = k_none;
     int quit = FALSE;
     int prev_selected; // 선택 객체가 변경되었음을 알려줌
@@ -22,7 +24,7 @@ int main() {
     Intro();
 
     add_system_message("프로그램을 시작합니다.");
-    add_system_message("Dune Game programmed by Jooyoung Yun, 2024/11/05");
+    add_system_message("Dune Game programmed by 윤주영(20232532), 2024/11/12");
 
     resource.population_max = 300; // 초기 최대 인구 수
     resource.spice_max = 100;
@@ -32,7 +34,7 @@ int main() {
     init_map(map);
     init_cursor(&cursor);
 
-    display(resource, map, cursor, -1);
+    display(resource, map, cursor, -1, clock);
 
     while (!quit) {
         KEY key = get_key();
@@ -53,12 +55,19 @@ int main() {
             prev_selected = selected;
             selected = check_object_select(cursor.pos);
             if (selected != -1 && prev_selected != selected)
-                add_system_fmessage("%c 가 선택되었습니다. ", objectPool[selected].obj->repr);
+                add_system_fmessage("%s이(가) 선택되었습니다. ",
+                    get_object_name(objectPool[selected].obj->repr));
             else if (selected == -1)
                 display_desert_information();
             break;
-        case k_escape:
-            selected = -1;
+        case k_escape: case k_X:
+            if (selected >= 0) { // 진행중이던 작업이 존재하는 경우
+                objectPool[selected].obj->cmd = c_none;
+                objectPool[selected].obj->consumed_time = 0;
+                add_system_fmessage("%s이(가) 진행중이던 작업을 취소하였습니다.",
+                    get_object_name(objectPool[selected].obj->repr));
+            }
+            selected = RESET_OBJECT; // -1은 선택되지 않음, RESET_OBJECT는 초기화
             clear_messages();
             break;
 
@@ -71,16 +80,21 @@ int main() {
         default:
             if (key != k_none)
                 prev_clock = -1000;
+            if (selected >= 0 && key != k_none) {
+                command = fetch_command(selected, key);
+                invoke_command(command, selected);
+            }
             break;
         }
         Sleep(TICK);
         clock += TICK;
 
-        display(resource, map, cursor, selected);
-        flushBuffer();
-
         object_move();
         put_object(map);
+        execute_command();
+
+        display(resource, map, cursor, selected, clock);
+        flushBuffer();
     }
 
     // 3초 후에 화면을 삭제하고 프로그램 종료

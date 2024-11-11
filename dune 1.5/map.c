@@ -2,6 +2,7 @@
 #include "object.h"
 
 // 추가된 object 들을 map 위에 놓음.
+POSITION storm_occur_position = { 9, 40 };
 void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 {
 	memset(map, 0, sizeof(char) * N_LAYER * MAP_HEIGHT * MAP_WIDTH);
@@ -16,11 +17,11 @@ void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 			map[l][r][c + 1] = obj->repr;
 			map[l][r + 1][c + 1] = obj->repr;
 		}
-		//worm의 꼬리를 증가시킴
-		else if (obj->repr == 'W' && obj->nblock > 0) {
+		// worm의 꼬리를 증가시킴
+		else if (obj->unit == SANDWORM && obj->nblock > 0) {
 			for (int i = 0; i < obj->nblock; i++) {
 				int r = obj->block[i].row, c = obj->block[i].column;
-				map[l][r][c] = 'w';
+				map[l][r][c] = obj->repr - 'A' + 'a'; // 대문자를 소문자로 변경
 			}
 		}
 	}
@@ -28,57 +29,52 @@ void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 }
 
 // 전역변수로 설정된 초기 object 정보를 map에 추가합니다.
-// 동적으로 추가되는 object는 objects에서 추가합니다.
+// copy_object를 통하여 동적으로 object를 할당받고 관련 내용을 복사한 후 objectPool에 추가
+
 void init_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 {
-	add_object(0, copy_object(& user_base));
-	add_object(0, copy_object(&ai_base));
-	for (int o = 0; o < sizeof(plates) / sizeof(plates[0]); o++)
-		add_object(0, copy_object(&plates[o]));
-	for (int o = 0; o < sizeof(spices) / sizeof(spices[0]); o++)
-		add_object(0, copy_object(&spices[0]));
-	for (int o = 0; o < sizeof(rocks) / sizeof(rocks[0]); o++)
-		add_object(0, copy_object(&rocks[o]));
+	build_base(USER, (POSITION) { MAP_HEIGHT - 2, 0 });
+	build_base(AI, (POSITION) { 0, MAP_WIDTH - 2 });
 
-	add_object(1, copy_object(&user_harvester));
-	add_object(1, copy_object(&ai_harvester));
-	for (int o = 0; o < sizeof(sandWorms) / sizeof(sandWorms[0]); o++)
-		add_object(1, copy_object(&units[o]));
+	build_plate((POSITION) { MAP_HEIGHT - 2, 2 });
+	build_plate((POSITION) { 0, MAP_WIDTH - 4 });
+
+	add_spice((POSITION) { MAP_HEIGHT - 6, 0 }, 5);
+	add_spice((POSITION) { 4, MAP_WIDTH - 1 }, 5);
+
+	add_rock((POSITION) { 3, 6 }, 2);
+	add_rock((POSITION) { MAP_HEIGHT - 4, 7 }, 2);
+	add_rock((POSITION) { MAP_HEIGHT - 5, 4 }, 1);
+	add_rock((POSITION) { 4, MAP_WIDTH - 5 }, 1);
+	add_rock((POSITION) { MAP_HEIGHT - 2, MAP_WIDTH - 4 }, 1);
+
+	add_harvester(USER, (POSITION) { MAP_HEIGHT - 3, 0 });
+	add_harvester(AI, (POSITION) { 2, MAP_WIDTH - 1 });
+
+	add_worm((POSITION) { 1, 3 });
+	add_worm((POSITION) { MAP_HEIGHT - 4, MAP_WIDTH - 6 });
+
+	add_eagle((POSITION) { 9, 20 });
+	add_storm(storm_occur_position);
+
+	add_soldier((POSITION) { 8, 6 });
+	add_soldier((POSITION) { 8, 20 });
+
+	add_fremen((POSITION) { 10, 8 });
+	add_fremen((POSITION) { 12, 15 });
+
+	add_fighter((POSITION) { 4, 50 });
+	add_fighter((POSITION) { 5, 60 });
+
+	add_tank((POSITION) { 7, 55 });
+	add_tank((POSITION) { 9, 45 });
 
 	put_object(map);
 }
 
-// 각각의 object에 맞는 색을 지정
-WORD setObjectColor(char repr)
-{
-	WORD color;
-	switch (repr) {
-	case '0': case'1': case'2': case'3': case'4': case'5': case'6': case'7': case'8': case'9':
-		color = FG_WHITE | BG_MAGENTA;
-		break;
-	case 'b': case 'h':
-		color = FG_WHITE | BG_BLUE;
-		break;
-	case 'B': case 'H':
-		color = FG_WHITE | BG_RED;
-		break;
-	case 'R':
-		color = FG_BLACK | BG_DARKGRAY;
-		break;
-	case 'w':	// SandWorm 꼬리
-		color = FG_YELLOW | BG_BROWN;
-		break;
-	case 'W':   //SandWorm 머리
-		color = FG_WHITE | BG_BROWN;
-		break;
-	case 'P':
-		color = FG_WHITE | BG_BLACK;
-		break;
-	default:
-		return 0;
-	}
-	return setTextAttribute(color);
-}
+char UnitSymbol[] = { ' ', 'B', 'P', '\0', 'R', 'D', 'G', 'K', 'L', 'A', 'C',
+	'H', 'M', 'S', 'F', 'T', 'W', 'E', 'O' };
+
 void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 {
 	WORD wAttr;
@@ -92,8 +88,10 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 		for (int y = 0; y < MAP_HEIGHT; ++y) {
 			for (int x = 0; x < MAP_WIDTH; ++x) {
 				if (map[l][y][x] != 0) {
-					wAttr = setObjectColor(map[l][y][x]);
-					putCharXY(rectMap.Left + x, rectMap.Top + y, map[l][y][x]);
+					//UNIT_TYPE unit = (UNIT_TYPE)map[l][y][x];
+					char sym = map[l][y][x];
+					wAttr = setObjectColor(sym);
+					putCharXY(rectMap.Left + x, rectMap.Top + y, sym);
 					if (wAttr)
 						setTextAttribute(wAttr);
 				}

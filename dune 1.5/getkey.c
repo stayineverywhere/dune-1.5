@@ -15,7 +15,8 @@ KEY get_key(void)
 	case 'p': case 'P': return k_P;
 	case 's': case 'S': return k_S;
 	case 't': case 'T': return k_T;
-	case 'q': return k_quit; // ' 를 누르면 종료
+	case 'x': case 'X': return k_X;
+	case 'q': case 'Q': return k_quit; // ' 를 누르면 종료
 	case ' ': return k_space;
 	case 27: return k_escape;
 	case 224:

@@ -30,7 +30,7 @@ void add_system_message(char* mesg)
 		wndSize = rectSysMesg.Bottom - rectSysMesg.Top + 1;
 
 	if (wndSize > MAX_BUFFER_SIZE) {
-		printf("Message buffer is too large.\n");
+		printf("Message buffer is too large. (%d vs %d)\n", wndSize, MAX_BUFFER_SIZE);
 		wndSize = MAX_BUFFER_SIZE;
 	}
 	if (++bufferIndex >= MAX_BUFFER_SIZE) {
