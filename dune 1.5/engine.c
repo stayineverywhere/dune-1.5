@@ -16,6 +16,12 @@
 *    - Bonus -> README.txt에 자세히 설명해두었습니다. 
 * 5) 시스템 메시지 
 */
+/*
+* 교수님께 
+* command창의 버퍼가 너무 크면은 속도가 느려지고 intro outro의 화면이 보이지 않는 경우가 있습니다. 
+* 설정을 가로 120 , 세로 40 ~ 50 으로 맞추시면 intro outro와 실행창이 보다 뚜렷하게 나타납니다. 
+* 감사합니다. 
+*/
 #include <stdio.h>
 #include "dune.h"
 
