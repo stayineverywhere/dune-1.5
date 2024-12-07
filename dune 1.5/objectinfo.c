@@ -60,7 +60,14 @@ S: 보병, F: 투사,\n\
 T: 중전차,\n\
 w,W: 샌드웜,\n\
 E: 사막독수리,\nO: 사막폭풍";
-char defaultCommand[] = "선택된 유닛이 없어\n실행가능한 명령이 없습니다.";
+char defaultCommand[] = "B : 건물 건축\n건축 가능한 건물리스트\n\
+- 장판 (건물 기초 생성),\n\
+- 숙소 (인구 수 증가),\n\
+- 창고 (스파이스 저장량 증가),\n\
+- 병영 (보병 생산),\n\
+- 은신처 (프레멘 생산),\n\
+- 투기장 (투사 생산),\n\
+- 공장 (중전차 생산)";
 
 // 객체 정보(문자)로부터 공동된 객체 정보를 출력하도록 관련 인덱스(enum)를 반환합니다.
 // spice의 경우, spice 관련 정보와 현재의 값을 출력하도록 추후 수정합니다.
@@ -129,13 +136,13 @@ void add_overlap_messages(SMALL_RECT rect, char* msg)
 			strncpy_s(cmdLine, sizeof(cmdLine), msg, len);
 			cmdLine[len] = '\0';
 			msg += len;
-			if (eol != NULL) msg++;
 			putStringXY(rect.Left, y, cmdLine);
 			// 현재 출력 라인의 남은 공간을 ' '로 채움
 			fillLine(rect.Left + len, y, rect.Right - rect.Left - len + 1, ' ', 0);
 		}
 		else // 한줄 전체를 ' '로 채움
 			fillLine(rect.Left, y, rect.Right - rect.Left + 1, ' ', 0);
+		if (eol != NULL) msg++;
 	}
 
 }
