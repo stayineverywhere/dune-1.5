@@ -4,6 +4,7 @@
 #include <conio.h>
 
 #define N_LAYER			3
+
 #define MAP_WIDTH		80
 #define MAP_HEIGHT		18
 #define MAX_OBJECT		100
@@ -11,6 +12,11 @@
 
 #define RESET_OBJECT	-100
 #define TICK 10
+
+#define BASE_LAYER 0
+#define GROUND_LAYER 1
+#define UNIT_LAYER 2
+#define SKY_LAYER 3
 
 extern char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH];
 
@@ -52,9 +58,12 @@ typedef enum {
 } UNIT_TYPE;
 
 typedef enum {
-	c_none,
+	c_none, c_wait, 
 	c_prod_harvestor, c_prod_soldier, c_prod_fremen, c_prod_fighter, c_produce_tank,
-	c_harvest, c_move, c_patrol
+	c_harvest, c_move, c_patrol ,
+	c_build_cmd, // 서브 명령어 실행
+	c_build_plate, c_build_dorm, c_build_garage,
+	c_build_barracks, c_build_shelter, c_build_arena, c_build_factory
 } COMMAND_TYPE;
 
 typedef struct {
@@ -194,6 +203,8 @@ OBJECT* copy_object(OBJECT* src);
 extern void add_object(int layer, OBJECT* obj);
 extern void build_base(USER_TYPE type, POSITION pos);
 extern void build_plate(POSITION pos);
+extern void build_dormitory(POSITION pos);
+extern void build_garage(POSITION pos);
 
 extern void build_barracks(POSITION pos);
 extern void build_shelter(POSITION pos);
@@ -215,6 +226,7 @@ extern WORD setObjectColor(char repr);
 
 extern int check_object_select(POSITION pos);
 extern void object_move();
+
 
 
 // inouttro.c

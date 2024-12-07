@@ -94,7 +94,7 @@ void build_base(USER_TYPE type, POSITION pos)
 	obj.pos = pos;
 	obj.size = 2;	//크기
 	obj.strength = 50; //내구도
-	add_object(0, copy_object(&obj));
+	add_object(BASE_LAYER, copy_object(&obj));
 }
 
 void build_plate(POSITION pos)
@@ -106,7 +106,7 @@ void build_plate(POSITION pos)
 	obj.size = 2;	//크기
 	obj.cost = 1; // 건설비용
 	obj.strength = 0; //내구도
-	add_object(0, copy_object(&obj));
+	add_object(BASE_LAYER, copy_object(&obj));
 }
 
 void build_dormitory(POSITION pos)
@@ -119,7 +119,7 @@ void build_dormitory(POSITION pos)
 	obj.cost = 2; // 건설비용
 	obj.strength = 10; //내구도
 	resource.population_max += 10; // 인구 최대치 증가시킴 (+10)
-	add_object(0, copy_object(&obj));
+	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
 void build_garage(POSITION pos)
@@ -132,7 +132,7 @@ void build_garage(POSITION pos)
 	obj.cost = 4; // 건설비용
 	obj.strength = 10; //내구도
 	resource.spice_max += 10; // 스파이스 최대 저장량 증가 (+10)
-	add_object(0, copy_object(&obj));
+	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
 void build_barracks(POSITION pos)
@@ -145,7 +145,7 @@ void build_barracks(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 4; // 건설비용
 	obj.strength = 20; //내구도
-	add_object(0, copy_object(&obj));
+	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
 void build_shelter(POSITION pos)
@@ -158,7 +158,7 @@ void build_shelter(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 5; // 건설비용
 	obj.strength = 30; //내구도
-	add_object(0, copy_object(&obj));
+	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
 void build_arena(POSITION pos)
@@ -171,7 +171,7 @@ void build_arena(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 3; // 건설비용
 	obj.strength = 15; //내구도
-	add_object(0, copy_object(&obj));
+	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
 void build_factory(POSITION pos)
@@ -184,7 +184,7 @@ void build_factory(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 5; // 건설비용
 	obj.strength = 30; //내구도
-	add_object(0, copy_object(&obj));
+	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
 
@@ -206,9 +206,11 @@ int check_near_spice(POSITION pos, int dist)
 
 int add_spice(POSITION pos, int reserves)
 {
-	// layer 0에 다른 object가 있으면 아무런 spice 생성하지 않음
-	if (map[0][pos.row][pos.column] != ' ' && map[0][pos.row][pos.column] != 0)
-		return FALSE;
+	// layer 0, 1에 다른 object가 있으면 아무런 spice 생성하지 않음
+	for (int l = 0; l < 2; l++) {
+		if (map[l][pos.row][pos.column] != ' ' && map[l][pos.row][pos.column] != 0)
+			return FALSE;
+	}
 	// 반경 [-5, 5]의 사각형 안에 이미 spice가 있으면 생성하지 않음
 	if (check_near_spice(pos, 5))
 		return FALSE;
@@ -223,7 +225,7 @@ int add_spice(POSITION pos, int reserves)
 		obj.repr = reserves + '0';
 	obj.pos = pos;
 	obj.size = 1;	//크기
-	add_object(0, copy_object(&obj));
+	add_object(BASE_LAYER, copy_object(&obj));
 	return TRUE;
 }
 
@@ -234,7 +236,7 @@ void add_rock(POSITION pos, int size)
 	obj.repr = 'R';
 	obj.pos = pos;
 	obj.size = size;	//크기
-	add_object(0, copy_object(&obj));
+	add_object(BASE_LAYER, copy_object(&obj));
 }
 
 void add_harvester(USER_TYPE type, POSITION pos)
@@ -288,7 +290,7 @@ void add_eagle(POSITION pos)
 	obj.move_period = EAGLE_MOVE_PERIOD / TICK; // 이동주기
 	obj.next_move_time = obj.move_period;
 	obj.vision = INT_MAX; // 시야, 무한대
-	add_object(2, copy_object(&obj)); // layer 1에 생산
+	add_object(SKY_LAYER, copy_object(&obj)); // layer 1에 생산
 }
 
 void add_storm(POSITION pos)
@@ -304,7 +306,7 @@ void add_storm(POSITION pos)
 	obj.attack_period = 10000 / TICK; //공격주기
 	obj.attack_power = INT_MAX; // 공격력, 무한대
 	obj.vision = INT_MAX; // 시야, 무한대
-	add_object(2, copy_object(&obj)); // layer 2에 생산
+	add_object(SKY_LAYER, copy_object(&obj)); // layer 2에 생산
 	sandstorm_id = nobject - 1;
 }
 
@@ -324,7 +326,7 @@ void add_soldier(POSITION pos)
 	obj.attack_period = 800 / TICK; //공격주기
 	obj.strength = 15; // 체력, 무한대
 	obj.vision = 1; // 시야, 무한대
-	add_object(1, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
 }
 
 void add_fremen(POSITION pos)
@@ -343,7 +345,7 @@ void add_fremen(POSITION pos)
 	obj.attack_period = 200 / TICK; //공격주기
 	obj.strength = 25; // 체력, 무한대
 	obj.vision = 8; // 시야, 무한대
-	add_object(1, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
 }
 
 void add_fighter(POSITION pos)
@@ -362,7 +364,7 @@ void add_fighter(POSITION pos)
 	obj.attack_period = 600 / TICK; //공격주기
 	obj.strength = 10; // 체력, 무한대
 	obj.vision = 1; // 시야, 무한대
-	add_object(1, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
 }
 void add_tank(POSITION pos)
 {
@@ -380,7 +382,7 @@ void add_tank(POSITION pos)
 	obj.attack_period = 4000 / TICK; //공격주기
 	obj.strength = 60; // 체력, 무한대
 	obj.vision = 4; // 시야, 무한대
-	add_object(1, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
 }
 
 // 배열에서 object를 삭제하고, 필요하면 OBJECT 구조체를 반환
@@ -487,6 +489,21 @@ int get_in_object_id(POSITION pos)
 	return -1;
 }
 
+int is_over_plate(POSITION pos)
+{
+	for (int i = 0; i < nobject; i++) {
+		OBJECT* obj = objectPool[i].obj;
+		if (obj->unit != PLATE) continue;
+		SMALL_RECT rect = { obj->pos.column, obj->pos.row,obj->pos.column + obj->size,
+							obj->pos.row + obj->size };
+		//add_system_fmessage("%c : %d, %d, %d, %d", obj->repr, obj->pos.row, obj->pos.column, pos->row, pos->column);
+		if (isPointIncluded(rect, pos)) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 // storm과 size=2인 경우에는 사각형과 사각형이 겹치는 지를 확인함
 int get_overlapped_id(SMALL_RECT obj_rect)
 {
@@ -536,7 +553,9 @@ void worm_action(OBJECT* worm, POSITION pos)
 {
 
 	// layer 0가 장판 (plate)이라면, worm은 유닛을 공격하지 않습니다.
-	if (map[0][pos.row][pos.column] == 'p' || map[0][pos.row][pos.column] == 'P')
+	if (map[BASE_LAYER][pos.row][pos.column] == 'p' || map[0][pos.row][pos.column] == 'P')
+		return;
+	else if (is_over_plate(pos)) // worm이 장판위로 올라가면 공격하지 않습니다.
 		return;
 
 	// worm은 머리만 object를 공격할 수 있습니다.
@@ -557,11 +576,11 @@ int check_unit(int r, int c)
 {
 	// 일반 유닛은 layer 1에 있음
 	// Harvest, Soldier, freMen, Fighter, Tank를 만나면 TRUE 리턴
-	if (map[1][r][c] == 'h' || map[1][r][c] == 'H' ||
-		map[1][r][c] == 'S' || map[1][r][c] == 'M' ||
-		map[1][r][c] == 'F' || map[1][r][c] == 'T')
+	if (map[UNIT_LAYER][r][c] == 'h' || map[UNIT_LAYER][r][c] == 'H' ||
+		map[UNIT_LAYER][r][c] == 'S' || map[UNIT_LAYER][r][c] == 'M' ||
+		map[UNIT_LAYER][r][c] == 'F' || map[UNIT_LAYER][r][c] == 'T')
 		return 1;
-	else if (map[0][r][c] == 'R' || map[1][r][c] == 'w' || map[1][r][c] == 'W')
+	else if (map[BASE_LAYER][r][c] == 'R' || map[UNIT_LAYER][r][c] == 'w' || map[UNIT_LAYER][r][c] == 'W')
 		return -1;
 	else  // 그렇지 않으면 FALSE 리턴
 		return 0;
@@ -593,7 +612,7 @@ void move_step(POSITION* pos, DIRECTION dir, int size)
 int is_moveable(POSITION pos)
 {
 	int r = pos.row, c = pos.column;
-	if (map[0][r][c] != 'R' && map[1][r][c] != 'w' && map[1][r][c] != 'W') // 이동 가능한 경우 웜이 먹을 수 있음
+	if (map[BASE_LAYER][r][c] != 'R' && map[UNIT_LAYER][r][c] != 'w' && map[UNIT_LAYER][r][c] != 'W') // 이동 가능한 경우 웜이 먹을 수 있음
 		return TRUE;
 	else // Rock이거나 Worm인 경우에는 이동 불가.
 		return FALSE;
