@@ -32,7 +32,7 @@ typedef struct {
 
 typedef enum {
 	k_none = 0, k_escape, k_space, k_A, k_B, k_C, k_D, k_E, k_F, k_G,
-	k_H, k_I, k_J, k_L, k_M, k_N,
+	k_H, k_I, k_J, k_K, k_L, k_M, k_N,
 	k_O, k_P, k_Q, k_R, k_S, k_T, k_U, k_V, k_W, k_X, k_Y, k_Z,
 	k_quit,
 	k_up, k_right, k_down, k_left,
@@ -235,6 +235,9 @@ extern void Intro();
 extern void Outtro();
 
 // objcmd.c
-extern COMMAND_TYPE fetch_command(int selected, KEY key);
-extern void invoke_command(COMMAND_TYPE cmd, int selected);
-extern void execute_command();
+extern COMMAND_TYPE fetch_unit_command(int selected, KEY key);
+extern void invoke_unit_command(COMMAND_TYPE cmd, int selected);
+extern void execute_unit_command();
+extern void show_building_command();
+extern COMMAND_TYPE fetch_build_command(KEY key);
+extern void invoke_build_command(COMMAND_TYPE cmd, POSITION pos);;
