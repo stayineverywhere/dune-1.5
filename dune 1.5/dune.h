@@ -194,6 +194,8 @@ extern void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 extern void init_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 
 extern void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+extern int check_empty(POSITION pos, int size);
+extern int check_plate(POSITION pos);
 
 // objects.c
 extern int nobject;

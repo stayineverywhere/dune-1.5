@@ -99,3 +99,25 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH])
 		}
 	}
 }
+
+// plate(장판)을 생성하기 위하여 layer0가 비었는지 검사
+int check_empty(POSITION pos, int size)
+{
+	for (int r = 0; r < size; r++) {
+		for (int c = 0; c < size; c++) {
+			if (map[BASE_LAYER][r + pos.row][c + pos.column] != ' ' &&
+				map[BASE_LAYER][r + pos.row][c + pos.column] != 0)
+				return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+int check_plate(POSITION pos)
+{
+	// layer0에 장판이 깔려 있는지 검사
+	if (map[BASE_LAYER][pos.row][pos.column] == 'P' || map[BASE_LAYER][pos.row][pos.column] == 'p')
+		return TRUE;
+	else
+		return FALSE;
+}
