@@ -3,8 +3,8 @@
 #include <Windows.h>
 #include <conio.h>
 
-#define N_LAYER			3
-
+#define N_LAYER			4	// Base, Plate, Spice, Rock은 Layer0, 건물은 Layer1, 
+// Unit은 Layer2, Sandstorm, SandEagle은 Layer3로 변경
 #define MAP_WIDTH		80
 #define MAP_HEIGHT		18
 #define MAX_OBJECT		100
@@ -58,9 +58,9 @@ typedef enum {
 } UNIT_TYPE;
 
 typedef enum {
-	c_none, c_wait, 
+	c_none, c_wait,
 	c_prod_harvestor, c_prod_soldier, c_prod_fremen, c_prod_fighter, c_produce_tank,
-	c_harvest, c_move, c_patrol ,
+	c_harvest, c_move, c_patrol,
 	c_build_cmd, // 서브 명령어 실행
 	c_build_plate, c_build_dorm, c_build_garage,
 	c_build_barracks, c_build_shelter, c_build_arena, c_build_factory
@@ -170,8 +170,8 @@ extern void add_system_message(char* mesg);
 extern void display_system_message();
 
 // objinfo.c
-char* get_object_name(char repr);
-
+extern char* get_object_name(char repr);
+extern void add_overlap_messages(SMALL_RECT rect, char* msg);
 extern void display_status(int selObj);
 extern void display_command(int selObj);
 extern void display_desert_information();
@@ -187,7 +187,6 @@ extern void increase_cursor_size(CURSOR* cursor);
 extern void decrease_cursor_size(CURSOR* cursor);
 extern void display_cursor(CURSOR cursor);
 extern void move_cursor(CURSOR* cursor, KEY key, int diff);
-extern void update_cursor(CURSOR* cursor);
 
 // map.c
 extern void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
@@ -231,7 +230,6 @@ extern int check_object_select(POSITION pos);
 extern void object_move();
 
 
-
 // inouttro.c
 
 extern void Intro();
@@ -243,4 +241,5 @@ extern void invoke_unit_command(COMMAND_TYPE cmd, int selected);
 extern void execute_unit_command();
 extern void show_building_command();
 extern COMMAND_TYPE fetch_build_command(KEY key);
-extern void invoke_build_command(COMMAND_TYPE cmd, POSITION pos);;
+extern void invoke_build_command(COMMAND_TYPE cmd, POSITION pos);
+

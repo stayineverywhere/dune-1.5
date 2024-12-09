@@ -1,27 +1,3 @@
-/* 진행 사항 (완료사항) 
-* 키 입력 받기
-* q가 입력 받고 3초후에 종료
-* 키 타입 정의
-* 방향키 입력 받기
-* 문자 색상 변경 
-* 스켈레톤 코드
-* 1) 준비
-* 초기 상태
-* 2) 커서 & 상태창 
-* 3) 중립 유닛 
-*    - 샌드웜 , Bonus 1 , Bonus 2
-*    - 샌드웜 이동 과정 -> README.txt에 설명해두었습니다. 
-*    - Bonus1 과 Bonus 2에 대해서는 README.txt에 설명해두었습니다. 
-* 4) 유닛 1기 생산
-*    - Bonus -> README.txt에 자세히 설명해두었습니다. 
-* 5) 시스템 메시지 
-*/
-/*
-* 교수님께 
-* command창의 버퍼가 너무 크면은 속도가 느려지고 intro outro의 화면이 보이지 않는 경우가 있습니다. 
-* 설정을 가로 120 , 세로 40 ~ 50 으로 맞추시면 intro outro와 실행창이 보다 뚜렷하게 나타납니다. 
-* 감사합니다. 
-*/
 #include <stdio.h>
 #include "dune.h"
 
@@ -64,7 +40,7 @@ int main()
         KEY key = get_key();
 
         switch (key) {
-        case k_quit:
+        case k_quit: case k_Q:
             add_system_message("프로그램을 종료합니다...");
             quit = TRUE;
             break;
@@ -76,13 +52,23 @@ int main()
             oldKey = key;
             break;
         case k_space:
-            prev_selected = selected;
-            selected = check_object_select(cursor.pos);
-            if (selected != -1 && prev_selected != selected)
-                add_system_fmessage("%s이(가) 선택되었습니다. ",
-                    get_object_name(objectPool[selected].obj->repr));
-            else if (selected == -1)
-                display_desert_information();
+            if (command == c_none) {
+                prev_selected = selected;
+                selected = check_object_select(cursor.pos);
+                if (selected != -1 && prev_selected != selected)
+                    add_system_fmessage("%s이(가) 선택되었습니다. ",
+                        get_object_name(objectPool[selected].obj->repr));
+                else if (selected == -1)
+                    display_desert_information();
+            }
+            else {
+                // build command
+                decrease_cursor_size(&cursor); // 커서 크기 축소
+                add_system_fmessage("건설 명령어: %d", command);
+                invoke_build_command(command, cursor.pos);
+                command = c_none;
+                selected = RESET_OBJECT;
+            }
             break;
         case k_escape: case k_X:
             if (selected >= 0) { // 진행중이던 작업이 존재하는 경우
@@ -91,22 +77,31 @@ int main()
                 add_system_fmessage("%s이(가) 진행중이던 작업을 취소하였습니다.",
                     get_object_name(objectPool[selected].obj->repr));
             }
+            else if (command != c_none) { // 건축 명령
+                decrease_cursor_size(&cursor); // 커서 크기 축소
+            }
             selected = RESET_OBJECT; // -1은 선택되지 않음, RESET_OBJECT는 초기화
+            command = c_none;
             clear_messages();
             break;
-
-        case k_M: // 임시로 커서 크기를 확대
-            increase_cursor_size(&cursor);
-            break;
-        case k_S: // 임시로 커서 크기를 축소
-            decrease_cursor_size(&cursor);
+        case k_B: // 생성 가능한 건물 리스트 출력 및 건물 건축 명령어 수집
+            if (selected == RESET_OBJECT) {
+                command = c_build_cmd;
+                show_building_command();
+            }
             break;
         default:
             if (key != k_none)
                 prev_clock = -1000;
+            // unit이 선택되어 있다면, 키 값을 입력 받아 명령어 전달
             if (selected >= 0 && key != k_none) {
-                command = fetch_command(selected, key);
-                invoke_command(command, selected);
+                command = fetch_unit_command(selected, key);
+                invoke_unit_command(command, selected);
+            }
+            // unit이 선택되지 않은 상황 (사막도 선택되지 않음, 사막은 -1로 선택)에서 
+            // build_cmd 상황이면 build command를 입력 받음
+            else if (selected == RESET_OBJECT && command == c_build_cmd && key != k_none) {
+                command = fetch_build_command(key);
             }
             break;
         }
@@ -115,7 +110,10 @@ int main()
 
         object_move();
         put_object(map);
-        execute_command();
+        execute_unit_command();
+        // build command가 즉시 시행되지 않고 지연된 실행을 지원하는 경우를 고려.
+        // 아직 미구현 : TODO
+        // execute_build_command();
 
         display(resource, map, cursor, selected, clock);
         flushBuffer();

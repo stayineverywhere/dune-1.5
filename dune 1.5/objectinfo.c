@@ -167,12 +167,13 @@ void display_status(int selObj)
 
 void display_command(int selObj)
 {
+	extern COMMAND_TYPE command;
 	if (selObj >= 0) {
 		int object = convert_repr2object(objectPool[selObj].obj->repr);
 		char* cmd = objCommand[object];
 		add_overlap_messages(rectCommand, cmd);
 	}
-	else if (selObj == RESET_OBJECT)
+	else if (selObj == RESET_OBJECT && command == c_none)
 		add_overlap_messages(rectCommand, defaultCommand);
 }
 

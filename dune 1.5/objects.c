@@ -11,6 +11,7 @@ int nobject = 0;
 OBJECT_POOL objectPool[MAX_POOL_SIZE];
 extern RESOURCE resource;
 
+
 // 각각의 object에 맞는 색을 지정
 WORD setObjectColor(char repr)
 {
@@ -41,7 +42,7 @@ WORD setObjectColor(char repr)
 		color = FG_YELLOW | BG_BROWN;
 		break;
 	case 'P':
-		color = FG_WHITE | BG_BLACK;
+		color = FG_WHITE | BG_LIGHTGRAY;
 		break;
 	default:
 		return 0;
@@ -197,7 +198,7 @@ int check_near_spice(POSITION pos, int dist)
 	for (int r = row_start; r <= row_end; r++) {
 		for (int c = col_start; c <= col_end; c++) {
 			// spice는 layer 0에 위치하고 있음. '1'~'9'의 값을 가지고 있음
-			if (map[0][r][c] >= '1' && map[0][r][c] <= '9')
+			if (map[BASE_LAYER][r][c] >= '1' && map[BASE_LAYER][r][c] <= '9')
 				return TRUE;
 		}
 	}
@@ -256,7 +257,7 @@ void add_harvester(USER_TYPE type, POSITION pos)
 	obj.strength = 70; //체력
 	obj.move_period = 2000 / TICK; // 이동주기
 	obj.next_move_time = obj.move_period;
-	add_object(1, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
 // 동영상으로 녹화하기 위하여 1/10 시간만 적용
@@ -276,7 +277,7 @@ void add_worm(POSITION pos)
 	obj.attack_period = 10000 / TICK; //공격주기
 	obj.attack_power = INT_MAX; // 공격력, 무한대
 	obj.vision = INT_MAX; // 시야, 무한대
-	add_object(1, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
 void add_eagle(POSITION pos)
@@ -290,7 +291,7 @@ void add_eagle(POSITION pos)
 	obj.move_period = EAGLE_MOVE_PERIOD / TICK; // 이동주기
 	obj.next_move_time = obj.move_period;
 	obj.vision = INT_MAX; // 시야, 무한대
-	add_object(SKY_LAYER, copy_object(&obj)); // layer 1에 생산
+	add_object(SKY_LAYER, copy_object(&obj)); // layer 3에 생산
 }
 
 void add_storm(POSITION pos)
@@ -306,7 +307,7 @@ void add_storm(POSITION pos)
 	obj.attack_period = 10000 / TICK; //공격주기
 	obj.attack_power = INT_MAX; // 공격력, 무한대
 	obj.vision = INT_MAX; // 시야, 무한대
-	add_object(SKY_LAYER, copy_object(&obj)); // layer 2에 생산
+	add_object(SKY_LAYER, copy_object(&obj)); // layer 3에 생산
 	sandstorm_id = nobject - 1;
 }
 
@@ -326,7 +327,7 @@ void add_soldier(POSITION pos)
 	obj.attack_period = 800 / TICK; //공격주기
 	obj.strength = 15; // 체력, 무한대
 	obj.vision = 1; // 시야, 무한대
-	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
 void add_fremen(POSITION pos)
@@ -345,7 +346,7 @@ void add_fremen(POSITION pos)
 	obj.attack_period = 200 / TICK; //공격주기
 	obj.strength = 25; // 체력, 무한대
 	obj.vision = 8; // 시야, 무한대
-	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
 void add_fighter(POSITION pos)
@@ -364,7 +365,7 @@ void add_fighter(POSITION pos)
 	obj.attack_period = 600 / TICK; //공격주기
 	obj.strength = 10; // 체력, 무한대
 	obj.vision = 1; // 시야, 무한대
-	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 void add_tank(POSITION pos)
 {
@@ -382,7 +383,7 @@ void add_tank(POSITION pos)
 	obj.attack_period = 4000 / TICK; //공격주기
 	obj.strength = 60; // 체력, 무한대
 	obj.vision = 4; // 시야, 무한대
-	add_object(UNIT_LAYER, copy_object(&obj)); // layer 1에 생산
+	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
 // 배열에서 object를 삭제하고, 필요하면 OBJECT 구조체를 반환
@@ -437,7 +438,6 @@ void worm_shorten(OBJECT* worm)
 		else
 			worm->nblock++;
 	}
-
 }
 
 
@@ -553,7 +553,7 @@ void worm_action(OBJECT* worm, POSITION pos)
 {
 
 	// layer 0가 장판 (plate)이라면, worm은 유닛을 공격하지 않습니다.
-	if (map[BASE_LAYER][pos.row][pos.column] == 'p' || map[0][pos.row][pos.column] == 'P')
+	if (map[BASE_LAYER][pos.row][pos.column] == 'p' || map[BASE_LAYER][pos.row][pos.column] == 'P')
 		return;
 	else if (is_over_plate(pos)) // worm이 장판위로 올라가면 공격하지 않습니다.
 		return;
@@ -574,7 +574,7 @@ void worm_action(OBJECT* worm, POSITION pos)
 
 int check_unit(int r, int c)
 {
-	// 일반 유닛은 layer 1에 있음
+	// 일반 유닛은 layer 2에 있음
 	// Harvest, Soldier, freMen, Fighter, Tank를 만나면 TRUE 리턴
 	if (map[UNIT_LAYER][r][c] == 'h' || map[UNIT_LAYER][r][c] == 'H' ||
 		map[UNIT_LAYER][r][c] == 'S' || map[UNIT_LAYER][r][c] == 'M' ||

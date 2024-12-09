@@ -8,15 +8,13 @@ KEY get_key(void)
 	}
 
 	int byte = _getch(); // 입력된 키를 전달 받기
+	if (byte >= 'a' && byte <= 'z') {
+		return k_A + byte - 'a';
+	}
+	else if (byte >= 'A' && byte <= 'Z') {
+		return k_A + byte - 'A';
+	}
 	switch (byte) {
-	case 'f': case 'F': return k_F;
-	case 'h': case 'H': return k_H;
-	case 'm': case 'M': return k_M;
-	case 'p': case 'P': return k_P;
-	case 's': case 'S': return k_S;
-	case 't': case 'T': return k_T;
-	case 'x': case 'X': return k_X;
-	case 'q': case 'Q': return k_quit; // ' 를 누르면 종료
 	case ' ': return k_space;
 	case 27: return k_escape;
 	case 224:
