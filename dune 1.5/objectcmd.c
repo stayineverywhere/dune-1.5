@@ -54,19 +54,90 @@ void alloc_command(OBJECT* obj, COMMAND_TYPE cmd, int delay_time, char* msg)
 	}
 }
 
-void harvest(COMMAND_TYPE cmd, int selected)
+void harvest(OBJECT* obj)
 {
+	// dest이 spice 매장된 곳
+	// spice>0이면 base로 이동, spice=0이면 dest로 이동
+	POSITION prev = obj->pos;
+	if (obj->spice > 0) {
+		// spice가 0보다 크면 dest로 이동
+		// rock이나 worm을 비전안에서 만나면 왼쪽이나 오른쪽으로 이동, 왼쪽부터 먼저 검사
+		move_to(obj, obj->orig);
+		obj->dir = 0;
+	}
+	else if (obj->spice == 0) {
+		move_to(obj, obj->dest);
+	}
 
+	// pos이 dest과 겹치면, harvest하여 spice 양 증가
+	if (obj->pos.row == obj->dest.row && obj->pos.column == obj->dest.column) {
+		// spice에 도착
+		for (int o = 0; o < nobject; o++) {
+			OBJECT* sp = objectPool[o].obj;
+			if (sp->unit == SPICE && sp->pos.row == obj->pos.row && sp->pos.column == obj->pos.column) {
+				add_system_message("하베스터가 수확 중입니다.");
+				// 수확하는데 3~5초 정도 걸림
+				Sleep(rand() % 2000 + 3000);
+				// 스파이스는 한번에 2~4만큼을 채취
+				int spice = rand() % 3 + 2; // 2~4
+				if (spice > sp->spice) spice = sp->spice;
+				obj->spice += spice; // spice 양 증가
+				sp->spice -= spice; // spice양 감소
+				add_system_fmessage("%d개의 스파이스를 수확하였습니다.", spice);
+				sp->repr = sp->spice + '0';
+				if (sp->spice == 0)
+					remove_object(o);
+				break;
+			}
+		}
+	}
+	else if (obj->pos.row == obj->orig.row && obj->pos.column == obj->orig.column) {
+		// base에 도착해서 spice 양 증가
+		extern RESOURCE resource;
+		if (resource.spice + obj->spice <= resource.spice_max)
+			resource.spice += obj->spice;
+		else // 최대 스파이스 양을 초과하면, 최대 스파이스만큼 저장하고 나머지는 삭제
+			resource.spice = resource.spice_max;
+		obj->spice = 0;
+		obj->dir = 1;
+	}
+	// 움직일 수 없으면 이전 좌표로 복원
+	if (map[BASE_LAYER][obj->pos.row][obj->pos.column] != ' ' && map[BASE_LAYER][obj->pos.row][obj->pos.column] != 0 &&
+		map[UNIT_LAYER][obj->pos.row][obj->pos.column] != ' ' && map[UNIT_LAYER][obj->pos.row][obj->pos.column] != 0)
+		obj->pos = prev;
 }
 
-void unit_move(COMMAND_TYPE cmd, int selected)
+void unit_move(OBJECT* obj)
 {
-
+	// post이 dest과 겹치면 아무 작업하지 않음
+	if (obj->pos.row != obj->dest.row || obj->pos.column != obj->dest.column) {
+		move_to(obj, obj->dest);
+	}
+	else {
+		// 임무 완수, 명령 대기 상태 (초기화)
+		obj->cmd = c_none;
+	}
+	// 목적지에 도착하더라고 적을 감시하도록 수정
+	check_enemy(obj);
 }
 
-void unit_patrol(COMMAND_TYPE cmd, int selected)
+void unit_patrol(OBJECT* obj)
 {
-
+	// pos이 dest과 겹치면 orig로 이동
+	if (obj->pos.row == obj->dest.row && obj->pos.column == obj->dest.column) {
+		obj->dir = 0; // 원점으로 이동
+	}
+	else if (obj->pos.row == obj->orig.row && obj->pos.column == obj->orig.column) {
+		obj->dir = 1; // 목적지로 이동
+	}
+	// orig와 dest를 왕복함.
+	if (obj->dir == 0) { // orig로 이동
+		move_to(obj, obj->orig);
+	}
+	else { // dest로 이동
+		move_to(obj, obj->dest);
+	}
+	check_enemy(obj);
 }
 
 void invoke_unit_command(COMMAND_TYPE cmd, int selected)
