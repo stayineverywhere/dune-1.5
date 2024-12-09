@@ -192,6 +192,8 @@ extern void increase_cursor_size(CURSOR* cursor);
 extern void decrease_cursor_size(CURSOR* cursor);
 extern void display_cursor(CURSOR cursor);
 extern void move_cursor(CURSOR* cursor, KEY key, int diff);
+extern void update_cursor(CURSOR* cursor);
+
 
 // map.c
 extern void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
@@ -209,7 +211,10 @@ extern int nobject;
 extern OBJECT_POOL objectPool[MAX_POOL_SIZE];
 OBJECT* copy_object(OBJECT* src);
 
-extern void add_object(int layer, OBJECT* obj);
+extern OBJECT* add_object(int layer, OBJECT* obj);
+extern OBJECT remove_object(int id);
+extern int isPointIncluded(SMALL_RECT rect, POSITION pos);
+extern int isRectOverlapped(SMALL_RECT r1, SMALL_RECT r2);
 extern void build_base(USER_TYPE type, POSITION pos);
 extern void build_plate(POSITION pos);
 extern void build_dormitory(POSITION pos);
@@ -227,8 +232,8 @@ extern void add_eagle(POSITION pos);
 extern void add_storm(POSITION pos);
 extern void add_soldier(POSITION pos);
 extern void add_fremen(POSITION pos);
-extern void add_fighter(POSITION pos);
-extern void add_tank(POSITION pos);
+extern OBJECT* add_fighter(POSITION pos);
+extern OBJECT* add_tank(POSITION pos);
 extern void free_objectPool();
 
 extern WORD setObjectColor(char repr);

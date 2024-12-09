@@ -3,6 +3,11 @@
 #include <malloc.h>
 #include <math.h>
 
+// 중간 제출때 1/10로 worm, eagle, storm의 이동을 표현하였기 때문에 정상적으로 시간을 복원
+#define WORM_MOVE_PERIOD 2500
+#define EAGLE_MOVE_PERIOD 2000
+#define STORM_MOVE_PERIOD 1500
+
 #define STORM_OCCUR_PERIOD (50000/TICK)	// Sandstorm이 발생하는 주기, 50초
 #define STORM_LAST_TIME (10000/TICK)	// Sandstorm이 존재하는 시간, 10초
 int sandstorm_id = -1;
@@ -62,23 +67,26 @@ OBJECT* copy_object(OBJECT* src)
 	return obj;
 }
 
-void add_object(int layer, OBJECT* obj)
+// object pool에 object 추가하고, 추가된 object 포인터를 반환
+OBJECT* add_object(int layer, OBJECT* obj)
 {
 	// object전체를 저장
 	if (nobject >= MAX_POOL_SIZE) {
 		add_system_message("Object pool is full.");
 		add_system_message("MAX_POOL_SIZE를 증가해야 합니다.");
-		return;
+		return NULL;
 	}
-	else if (resource.population + obj->population > resource.population_max) {
+	// 사용자인 경우에만, reource를 검사
+	else if (obj->type == USER && resource.population + obj->population > resource.population_max) {
 		add_system_message("최대 인구수를 초과하였습니다.\n숙소를 더 생성하기 바랍니다.");
 		add_system_fmessage("current: %d, obj: %d, max: %d",
 			resource.population, obj->population, resource.population_max);
-		return;
+		return NULL;
 	}
 	objectPool[nobject].layer = layer;
 	objectPool[nobject++].obj = obj;
 	resource.population += obj->population;
+	return obj;
 }
 
 
@@ -95,6 +103,7 @@ void build_base(USER_TYPE type, POSITION pos)
 	obj.pos = pos;
 	obj.size = 2;	//크기
 	obj.strength = 50; //내구도
+	obj.consumed_time = 0;
 	add_object(BASE_LAYER, copy_object(&obj));
 }
 
@@ -107,6 +116,7 @@ void build_plate(POSITION pos)
 	obj.size = 2;	//크기
 	obj.cost = 1; // 건설비용
 	obj.strength = 0; //내구도
+	obj.consumed_time = 0;
 	add_object(BASE_LAYER, copy_object(&obj));
 }
 
@@ -119,6 +129,7 @@ void build_dormitory(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 2; // 건설비용
 	obj.strength = 10; //내구도
+	obj.consumed_time = obj.cost * 1000 / TICK;
 	resource.population_max += 10; // 인구 최대치 증가시킴 (+10)
 	add_object(GROUND_LAYER, copy_object(&obj));
 }
@@ -132,6 +143,7 @@ void build_garage(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 4; // 건설비용
 	obj.strength = 10; //내구도
+	obj.consumed_time = obj.cost * 1000 / TICK;
 	resource.spice_max += 10; // 스파이스 최대 저장량 증가 (+10)
 	add_object(GROUND_LAYER, copy_object(&obj));
 }
@@ -146,6 +158,7 @@ void build_barracks(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 4; // 건설비용
 	obj.strength = 20; //내구도
+	obj.consumed_time = obj.cost * 1000 / TICK;
 	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
@@ -159,6 +172,7 @@ void build_shelter(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 5; // 건설비용
 	obj.strength = 30; //내구도
+	obj.consumed_time = obj.cost * 1000 / TICK;
 	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
@@ -172,6 +186,7 @@ void build_arena(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 3; // 건설비용
 	obj.strength = 15; //내구도
+	obj.consumed_time = obj.cost * 1000 / TICK;
 	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
@@ -185,6 +200,7 @@ void build_factory(POSITION pos)
 	obj.size = 1;	//크기
 	obj.cost = 5; // 건설비용
 	obj.strength = 30; //내구도
+	obj.consumed_time = obj.cost * 1000 / TICK;
 	add_object(GROUND_LAYER, copy_object(&obj));
 }
 
@@ -219,11 +235,11 @@ int add_spice(POSITION pos, int reserves)
 	OBJECT obj = { 0 };
 	obj.unit = SPICE;
 	if (reserves < 0) {
-		obj.repr = rand() % 9 + '1'; // '1' ~ '9'
-		add_system_fmessage("매장량 %c인 스파이스가 생성되었습니다.", obj.repr);
+		reserves = rand() % 9 + 1;
+		add_system_fmessage("매장량 %c인 스파이스가 생성되었습니다.", reserves + '0');
 	}
-	else
-		obj.repr = reserves + '0';
+	obj.spice = reserves;
+	obj.repr = reserves + '0';
 	obj.pos = pos;
 	obj.size = 1;	//크기
 	add_object(BASE_LAYER, copy_object(&obj));
@@ -246,9 +262,14 @@ void add_harvester(USER_TYPE type, POSITION pos)
 	obj.unit = HARVESTER;
 	if (type == USER) {
 		obj.repr = 'h';
+		// 사용자의 base 위치
+		obj.orig = (POSITION){ MAP_HEIGHT - 2, 0 };
 	}
-	else
+	else {
 		obj.repr = 'H';
+		// AI의 base 위치
+		obj.orig = (POSITION){ 0, MAP_WIDTH - 2 };
+	}
 	obj.type = type;
 	obj.pos = pos;
 	obj.size = 1;	//크기
@@ -260,10 +281,6 @@ void add_harvester(USER_TYPE type, POSITION pos)
 	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
-// 동영상으로 녹화하기 위하여 1/10 시간만 적용
-#define WORM_MOVE_PERIOD 250
-#define EAGLE_MOVE_PERIOD 200
-#define STORM_MOVE_PERIOD 150
 void add_worm(POSITION pos)
 {
 	OBJECT obj = { 0 };
@@ -325,6 +342,7 @@ void add_soldier(POSITION pos)
 	obj.next_move_time = obj.move_period;
 	obj.attack_power = 5; // 공격력, 무한대
 	obj.attack_period = 800 / TICK; //공격주기
+	obj.next_attack_time = obj.attack_period;
 	obj.strength = 15; // 체력, 무한대
 	obj.vision = 1; // 시야, 무한대
 	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
@@ -344,12 +362,13 @@ void add_fremen(POSITION pos)
 	obj.next_move_time = obj.move_period;
 	obj.attack_power = 15; // 공격력, 무한대
 	obj.attack_period = 200 / TICK; //공격주기
+	obj.next_attack_time = obj.attack_period;
 	obj.strength = 25; // 체력, 무한대
 	obj.vision = 8; // 시야, 무한대
 	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
-void add_fighter(POSITION pos)
+OBJECT* add_fighter(POSITION pos)
 {
 	OBJECT obj = { 0 };
 	obj.type = AI;
@@ -363,11 +382,12 @@ void add_fighter(POSITION pos)
 	obj.next_move_time = obj.move_period;
 	obj.attack_power = 6; // 공격력, 무한대
 	obj.attack_period = 600 / TICK; //공격주기
+	obj.next_attack_time = obj.attack_period;
 	obj.strength = 10; // 체력, 무한대
 	obj.vision = 1; // 시야, 무한대
-	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
+	return add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
-void add_tank(POSITION pos)
+OBJECT* add_tank(POSITION pos)
 {
 	OBJECT obj = { 0 };
 	obj.type = AI;
@@ -381,9 +401,10 @@ void add_tank(POSITION pos)
 	obj.next_move_time = obj.move_period;
 	obj.attack_power = 45; // 공격력, 무한대
 	obj.attack_period = 4000 / TICK; //공격주기
+	obj.next_attack_time = obj.attack_period;
 	obj.strength = 60; // 체력, 무한대
 	obj.vision = 4; // 시야, 무한대
-	add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
+	return add_object(UNIT_LAYER, copy_object(&obj)); // layer 2에 생산
 }
 
 // 배열에서 object를 삭제하고, 필요하면 OBJECT 구조체를 반환
@@ -474,19 +495,22 @@ int isRectOverlapped(SMALL_RECT r1, SMALL_RECT r2)
 		return TRUE;
 }
 
-// 현재 위치와 겹치는 object를 반환
+// 현재 위치와 겹치는 object를 반환, 동일한 위치인 경우에는 높은 layer의 object를 반환
 int get_in_object_id(POSITION pos)
 {
+	int max_layer = -1;
+	int id = -1;
 	for (int i = 0; i < nobject; i++) {
 		OBJECT* obj = objectPool[i].obj;
-		SMALL_RECT rect = { obj->pos.column, obj->pos.row,obj->pos.column + obj->size,
-							obj->pos.row + obj->size };
+		SMALL_RECT rect = { obj->pos.column, obj->pos.row,
+							obj->pos.column + obj->size, obj->pos.row + obj->size };
 		//add_system_fmessage("%c : %d, %d, %d, %d", obj->repr, obj->pos.row, obj->pos.column, pos->row, pos->column);
-		if (isPointIncluded(rect, pos)) {
-			return i;
+		if (isPointIncluded(rect, pos) && objectPool[i].layer > max_layer) {
+			max_layer = objectPool[i].layer;
+			id = i;
 		}
 	}
-	return -1;
+	return id;
 }
 
 int is_over_plate(POSITION pos)
@@ -494,8 +518,8 @@ int is_over_plate(POSITION pos)
 	for (int i = 0; i < nobject; i++) {
 		OBJECT* obj = objectPool[i].obj;
 		if (obj->unit != PLATE) continue;
-		SMALL_RECT rect = { obj->pos.column, obj->pos.row,obj->pos.column + obj->size,
-							obj->pos.row + obj->size };
+		SMALL_RECT rect = { obj->pos.column, obj->pos.row,
+							obj->pos.column + obj->size, obj->pos.row + obj->size };
 		//add_system_fmessage("%c : %d, %d, %d, %d", obj->repr, obj->pos.row, obj->pos.column, pos->row, pos->column);
 		if (isPointIncluded(rect, pos)) {
 			return TRUE;
@@ -524,8 +548,7 @@ int get_overlapped_id(SMALL_RECT obj_rect)
 int check_object_select(POSITION pos)
 {
 	// 스크린 좌표와 map 좌표를 보정함
-	POSITION mod_pos = { pos.row - rectMap.Top, pos.column - rectMap.Left };
-	return get_in_object_id(mod_pos);
+	return get_in_object_id(cvt_map_position(pos));
 }
 
 
@@ -680,6 +703,7 @@ POSITION decide_next_move(POSITION pos)
 	if (dir == 0) { // object가 발견되지 않으며, 움직일 수 있는 방향 중에서 하나를 선택
 		int available[4];
 		int navail = check_moveable_dir(available, pos);
+		if (navail == 0) return pos; // worm이 구석에 갇힘.. ㅠㅠ
 		dir = available[rand() % navail];
 	}
 	move_step(&pos, dir, 1);
@@ -777,6 +801,7 @@ void worm_move(OBJECT* obj)
 void object_move()
 {
 	static int sandstorm_period, sandstorm_last = STORM_LAST_TIME;
+	extern CURSOR cursor;
 
 	// Bonus 2)
 	// 일정 시간이 지나면 storm이 소멸됨
@@ -799,11 +824,14 @@ void object_move()
 			// add_system_fmessage("사막태풍이 %d초 후 발생할 예정입니다.", sandstorm_period/100);
 		}
 	}
+	POSITION pos = cvt_map_position(cursor.pos);
 
 	for (int n = 0; n < nobject; n++)
 	{
 		OBJECT* obj = objectPool[n].obj;
+		POSITION before = obj->pos;
 		obj->next_move_time--;
+		obj->next_attack_time--;
 		if (obj->next_move_time == 0) {
 			switch (obj->unit) {
 			case SANDSTORM:	// sand storm
@@ -815,7 +843,20 @@ void object_move()
 			case SANDWORM:	// sand worm
 				worm_move(obj);
 				break;
+			case HARVESTER:
+			case FREMEN:
+			case SOLDIER:
+			case FIGHTER:
+			case TANK:
+				if (obj->cmd == c_harvest) harvest(obj);
+				else if (obj->cmd == c_move) unit_move(obj);
+				else if (obj->cmd == c_patrol) unit_patrol(obj);
+				break;
 			}
+			// 이전 좌표나 변경 좌표가 커서와 겹치면 커서 정보를 갱신
+			if (before.row == pos.row && before.column == pos.column ||
+				obj->pos.row == pos.row && obj->pos.column == pos.column)
+				update_cursor_info(&cursor);
 			obj->next_move_time = obj->move_period;
 		}
 	}
