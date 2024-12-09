@@ -70,18 +70,22 @@ typedef struct {
 	USER_TYPE type;			// 사용자 또는 AI, 문자로 구분하기 어려울때를 위하여 미리 할당
 	UNIT_TYPE unit;
 	POSITION pos;			// 현재 위치 (position)
+	POSITION orig;			// harvester의 경우 base 위치, patrol의 경우 orig와 dest를 왕복
 	POSITION dest;			// 목적지 (destination)
+	int dir;				// patrol이나 harvest의 경우 움직이는 방향, 0 : orig, 1: dest
 	COMMAND_TYPE cmd;
 
 	int size;				// 크기
+	int spice;				// 스파이스를 채굴한 경우 소지된 양을 포함
 	char repr;				// 화면에 표시할 문자 (representation)
 	int consumed_time;		// 건물에서 unit을 생성하는데 걸리는 시간, unit 마다 생성 시간이 다름
-	int  move_period;		// 몇 ms 마다 한 칸 움직이는지 를 뜻함
-	int  next_move_time;	// 다음에 움직일 시간
+	int move_period;		// 몇 ms 마다 한 칸 움직이는지 를 뜻함
+	int next_move_time;	// 다음에 움직일 시간
 	int cost;				// 건설/생산 비용
 	int population;			// 인구수
 	int attack_power;		// 공격력
 	int attack_period;		// 공격주기
+	int next_attack_time;
 	int strength;			// 체력/내구도
 	int vision;				// 시야
 
