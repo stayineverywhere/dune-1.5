@@ -187,6 +187,7 @@ extern void increase_cursor_size(CURSOR* cursor);
 extern void decrease_cursor_size(CURSOR* cursor);
 extern void display_cursor(CURSOR cursor);
 extern void move_cursor(CURSOR* cursor, KEY key, int diff);
+extern void update_cursor(CURSOR* cursor);
 
 // map.c
 extern void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);

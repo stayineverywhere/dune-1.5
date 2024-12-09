@@ -22,9 +22,8 @@ void init_cursor(CURSOR* cursor) {
 // console의 커서를 사용하는 방법도 고려하였으나, 2x2 화면 커서를 출력하기 위하서 자체적으로 커서를 출력함
 void display_cursor(CURSOR cursor) {
 	CHAR_INFO ch = getCharXY(cursor.pos.column, cursor.pos.row);
-	// 커서의 색을 기존 글자색의 반전(배경색->전경색, 전경색->배경색)하여 사용함
-	WORD fg = ch.Attributes & 0x0F, bg = ch.Attributes & 0xF0;
-	WORD wAttr = setTextAttribute(fg << 4 | bg >> 4);
+	// 커서는 기본 글자의 반전을 이용
+	WORD wAttr = reverseAttribute(ch.Attributes);
 
 	// 커서를 그림. size에 따라 1x1 또는 2x2를 출력
 	putCharXY(cursor.pos.column, cursor.pos.row, cursor.charInfo[0].Char.UnicodeChar);
@@ -128,4 +127,9 @@ void move_cursor(CURSOR* cursor, KEY key, int diff) {
 			cursor->charInfo[3] = getCharXY(cursor->pos.column + 1, cursor->pos.row + 1);
 		}
 	}
+}
+
+void update_cursor(CURSOR* cursor)
+{
+	cursor->charInfo[0] = getCharXY(cursor->pos.column, cursor->pos.row);
 }
