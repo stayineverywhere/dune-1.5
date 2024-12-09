@@ -22,13 +22,13 @@ char objInformation[MAX_OBJECT][MAX_MESG_LINE] = {
 	"투사를 생산할 수 있습니다.", // 투기장
 	"중전차를 생산할 수 있습니다.", // 공장
 	"하베스터는\nspice를 채굴하거나 이동합니다.\n생산비용: 5, 인구수: 5\n이동주기: 2초\n공격력, 공격주기: 없음\n체력: 70, 시야:0", // harvester
-	"", // 프레멘
-	"", // 보병
-	"", // 투사
-	"", // 중전차
-	"", //샌드웜
-	"", // 사막독수리
-	"" // 사막폭풍
+	"프레멘은 빠르고 은밀합니다.\n생산비용: 5, 인구수: 2\n이동주기: 0.4초\n공격력: 15, 공격주기: 0.2초\n체력: 25, 시야:8", // 프레멘
+	"보병은 저렴하고 쉽게 생산할 수 있습니다.\n주로 초기 공격이나 방어에 활용됩니다.\n생산비용: 1, 인구수: 1\n이동주기: 1초\n공격력: 5,공격주기: 0.8초\n체력: 15, 시야:1", // 보병
+	"투사는 일반 보병보다 강력하며,\n중전차와 같은 강력한 유닛에\n대응합니다.\n생산비용: 1, 인구수: 1\n이동주기: 1.2초\n공격력: 6,공격주기: 0.6초\n체력: 10, 시야:1", // 투사
+	"중전차는 전면 공격을 하는 유닛으로\n높은 방어력과 강력한 화력을 자랑합니다.\n생산비용: 12, 인구수: 5\n이동주기: 3초\n공격력: 40,공격주기: 4초\n체력: 60, 시야:4", // 중전차
+	"사막지역에서 유닛과 차량을 삼켜버립니다.", //샌드웜
+	"목적없이 하늘을 날아다니는 공중 유닛입니다.", // 사막독수리
+	"자연재해로 건물이나 유닛을 파괴합니다." // 사막폭풍
 };
 
 char objCommand[MAX_OBJECT][MAX_MESG_LINE] = {
@@ -73,6 +73,8 @@ char defaultCommand[] = "B : 건물 건축\n건축 가능한 건물리스트\n\
 // spice의 경우, spice 관련 정보와 현재의 값을 출력하도록 추후 수정합니다.
 UNIT_TYPE convert_repr2object(char repr)
 {
+	if (repr < 0)
+		repr = -repr;
 	switch (repr) {
 	case 'h': case 'H':
 		return HARVESTER;
@@ -91,6 +93,8 @@ UNIT_TYPE convert_repr2object(char repr)
 		return FREMEN;
 	case 'F':
 		return FIGHTER;
+	case 'G':
+		return GARAGE;
 	case 'T':
 		return TANK;
 	case 'D':
@@ -152,14 +156,25 @@ void display_status(int selObj)
 	if (selObj >= 0) {
 		OBJECT* obj = objectPool[selObj].obj;
 		int obj_class = convert_repr2object(obj->repr);
-		char* status = objInformation[obj_class];
-		add_overlap_messages(rectStatusMsg, status);
-		if (obj->consumed_time > 0) {
-			char buf[128];
-			sprintf_s(buf, sizeof buf, "현재 생산중인 유닛이 존재합니다.\n남은 완료 시간 %d ms",
-				obj->consumed_time * TICK);
-			add_overlap_messages(rectStatusMsg, buf);
+		char* desc = objInformation[obj_class];
+		char status_buf[2048];
+		char tmp[128];
+		//add_overlap_messages(rectStatusMsg, status);
+		strcpy_s(status_buf, sizeof status_buf, desc);
+		if (obj->unit == HARVESTER) {
+			sprintf_s(tmp, sizeof tmp, "\n보유 스파이스: %d", obj->spice);
+			strcat_s(status_buf, sizeof status_buf, tmp);
 		}
+		sprintf_s(tmp, sizeof tmp, "\n현재 체력: %d\n", obj->strength);
+		strcat_s(status_buf, sizeof status_buf, tmp);
+
+		if (obj->consumed_time > 0) {
+			sprintf_s(tmp, sizeof tmp, "****\n현재 생산중인 유닛이 존재합니다.\n남은 완료 시간 %d ms",
+				obj->consumed_time * TICK);
+			//add_overlap_messages(rectStatusMsg, buf);
+			strcat_s(status_buf, sizeof status_buf, tmp);
+		}
+		add_overlap_messages(rectStatusMsg, status_buf);
 	}
 	else if (selObj == RESET_OBJECT)
 		add_overlap_messages(rectStatusMsg, symbolDescription);
@@ -171,7 +186,10 @@ void display_command(int selObj)
 	if (selObj >= 0) {
 		int object = convert_repr2object(objectPool[selObj].obj->repr);
 		char* cmd = objCommand[object];
-		add_overlap_messages(rectCommand, cmd);
+		if (objectPool[selObj].obj->type != AI)
+			add_overlap_messages(rectCommand, cmd);
+		else
+			add_overlap_messages(rectCommand, "");
 	}
 	else if (selObj == RESET_OBJECT && command == c_none)
 		add_overlap_messages(rectCommand, defaultCommand);

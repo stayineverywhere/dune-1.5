@@ -196,6 +196,8 @@ extern void move_cursor(CURSOR* cursor, KEY key, int diff);
 extern void put_object(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 
 extern void init_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+extern void hakonen_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+extern POSITION cvt_map_position(POSITION pos);
 
 extern void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 extern int check_empty(POSITION pos, int size);
@@ -240,10 +242,15 @@ extern void Intro();
 extern void Outtro();
 
 // objcmd.c
+extern void harvest(OBJECT* obj);
+extern void unit_move(OBJECT* obj);
+extern void unit_patrol(OBJECT* obj);
 extern COMMAND_TYPE fetch_unit_command(int selected, KEY key);
-extern void invoke_unit_command(COMMAND_TYPE cmd, int selected);
+extern void invoke_unit_command(COMMAND_TYPE cmd, int selected, POSITION pos);
 extern void execute_unit_command();
 extern void show_building_command();
 extern COMMAND_TYPE fetch_build_command(KEY key);
 extern void invoke_build_command(COMMAND_TYPE cmd, POSITION pos);
-
+extern void execute_build_command();
+extern void cancel_build_command(int selected);
+extern int is_pos_command(COMMAND_TYPE command);
