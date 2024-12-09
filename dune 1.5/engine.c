@@ -8,6 +8,12 @@ int clock = 0, prev_clock = -1000;
 int selected = RESET_OBJECT;
 COMMAND_TYPE command = c_none;
 
+void update_cursor_info(CURSOR* cursor)
+{
+    put_object(map);
+    display_map(map);
+    update_cursor(cursor);
+}
 
 int main()
 {
@@ -24,7 +30,7 @@ int main()
     Intro();
 
     add_system_message("프로그램을 시작합니다.");
-    add_system_message("Dune Game programmed by 윤주영(20232532), 2024/11/12");
+    add_system_message("Dune Game programmed by 윤주영(20232532), 2024/12/10");
 
     resource.population_max = 300; // 초기 최대 인구 수
     resource.spice_max = 100;
@@ -32,6 +38,9 @@ int main()
     add_system_fmessage("최대 인구 수는 %d으로 설정되었습니다.", resource.population_max);
 
     init_map(map);
+    hakonen_map(map); // 하코넨 진영 명령어
+    put_object(map);
+
     init_cursor(&cursor);
 
     display(resource, map, cursor, -1, clock);
@@ -61,13 +70,24 @@ int main()
                 else if (selected == -1)
                     display_desert_information();
             }
-            else {
+            else if (selected >= 0 && is_pos_command(command)) {
+                // unit 명령어를 위한 추가 명령 (위치 지정)
+                add_system_fmessage("%s 위치 지정 명령",
+                    get_object_name(objectPool[selected].obj->repr));
+                objectPool[selected].obj->cmd = command;
+                objectPool[selected].obj->dest = cvt_map_position(cursor.pos);
+                command = c_none;
+                selected = RESET_OBJECT;
+            }
+            else if (selected == RESET_OBJECT) {
                 // build command
                 decrease_cursor_size(&cursor); // 커서 크기 축소
                 add_system_fmessage("건설 명령어: %d", command);
                 invoke_build_command(command, cursor.pos);
                 command = c_none;
                 selected = RESET_OBJECT;
+                // cursor가 있는 자리에서 건물 업데이트가 발생하였기 때문에, 강제로 커서 정보 갱신
+                update_cursor_info(&cursor);
             }
             break;
         case k_escape: case k_X:
@@ -80,23 +100,29 @@ int main()
             else if (command != c_none) { // 건축 명령
                 decrease_cursor_size(&cursor); // 커서 크기 축소
             }
+            else {
+                int s = check_object_select(cursor.pos);
+                cancel_build_command(s);
+                // cursor가 있는 자리에서 건물 건설 취소가 발생하였기 때문에, 강제로 커서 정보 갱신
+                update_cursor_info(&cursor);
+            }
             selected = RESET_OBJECT; // -1은 선택되지 않음, RESET_OBJECT는 초기화
             command = c_none;
             clear_messages();
             break;
         case k_B: // 생성 가능한 건물 리스트 출력 및 건물 건축 명령어 수집
-            if (selected == RESET_OBJECT) {
+            if (selected == RESET_OBJECT && command == c_none) {
                 command = c_build_cmd;
                 show_building_command();
+                break;
             }
-            break;
         default:
             if (key != k_none)
                 prev_clock = -1000;
             // unit이 선택되어 있다면, 키 값을 입력 받아 명령어 전달
             if (selected >= 0 && key != k_none) {
                 command = fetch_unit_command(selected, key);
-                invoke_unit_command(command, selected);
+                invoke_unit_command(command, selected, cursor.pos);
             }
             // unit이 선택되지 않은 상황 (사막도 선택되지 않음, 사막은 -1로 선택)에서 
             // build_cmd 상황이면 build command를 입력 받음
@@ -112,8 +138,7 @@ int main()
         put_object(map);
         execute_unit_command();
         // build command가 즉시 시행되지 않고 지연된 실행을 지원하는 경우를 고려.
-        // 아직 미구현 : TODO
-        // execute_build_command();
+        execute_build_command();
 
         display(resource, map, cursor, selected, clock);
         flushBuffer();

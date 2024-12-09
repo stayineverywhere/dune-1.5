@@ -29,6 +29,13 @@ void cursorOff()
     SetConsoleCursorInfo(hStdOut, &info);
 }
 
+// 기존 글자색의 반전(배경색->전경색, 전경색->배경색)
+WORD reverseAttribute(WORD attr)
+{
+    WORD fg = attr & 0x0F, bg = attr & 0xF0;
+    WORD wAttr = setTextAttribute(fg << 4 | bg >> 4);
+    return wAttr;
+}
 void cursorOn()
 {
     CONSOLE_CURSOR_INFO info;
@@ -298,14 +305,13 @@ void flushBuffer()
     SMALL_RECT srcReadRect = { 0, 0, screenSize.X - 1, screenSize.Y - 1 };
     SMALL_RECT srcWriteRect = { 0, 0, screenSize.X - 1, screenSize.Y - 1 };
 
+    FlushFileBuffers(hHiddenBuffer);
 
     // 현재 스크린과 Double Buffered된 Console의 내용이 바뀌지 않았으면, 화면을 업데이트하지 않음
-    // 10ms 단위로 _kbhit()를 검사하고, 화면을 다시 그리도록 하기 때문에 변화없는 화면의 경우 다시 그리지 않음
+// 10ms 단위로 _kbhit()를 검사하고, 화면을 다시 그리도록 하기 때문에 변화없는 화면의 경우 다시 그리지 않음
     ReadConsoleOutput(hStdOut, frameBack, coordBufferSize, coordScreen, &srcReadRect);
     ReadConsoleOutput(hHiddenBuffer, frameData, coordBufferSize, coordScreen, &srcReadRect);
     if (frameDataChanged(frameBack, frameData)) {
         WriteConsoleOutput(hStdOut, frameData, coordBufferSize, coordScreen, &srcWriteRect);
     }
 }
-
-

@@ -141,6 +141,7 @@ extern COORD screenSize;
 extern CHAR_INFO* frameData;
 extern SMALL_RECT rectResourceMesg, rectMap, rectSysMesg, rectStatusMsg, rectCommand;
 
+extern WORD reverseAttribute(WORD attr);
 
 extern void cursorOff();
 extern void cursorOn();
@@ -254,3 +255,6 @@ extern void invoke_build_command(COMMAND_TYPE cmd, POSITION pos);
 extern void execute_build_command();
 extern void cancel_build_command(int selected);
 extern int is_pos_command(COMMAND_TYPE command);
+
+// engine.c
+extern void update_cursor_info(CURSOR* cursor);
