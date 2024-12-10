@@ -315,3 +315,5 @@ void flushBuffer()
         WriteConsoleOutput(hStdOut, frameData, coordBufferSize, coordScreen, &srcWriteRect);
     }
 }
+
+
