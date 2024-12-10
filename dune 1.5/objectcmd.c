@@ -374,7 +374,7 @@ void produce_unit(OBJECT* obj, UNIT_TYPE unit, char* name)
 		break;
 
 	}
-	add_system_fmessage("%s가 준비되었습니다. (%d, %d)", name, pos.row, pos.column);
+	add_system_fmessage("%s이(가) 준비되었습니다. (%d, %d)", name, pos.row, pos.column);
 
 }
 
@@ -392,10 +392,12 @@ void execute_unit_command()
 	for (int o = 0; o < nobject; o++) {
 		OBJECT* obj = objectPool[o].obj;
 		if (obj->cmd != c_none) {
-			if (--obj->consumed_time == 0) {
+			if (obj->consumed_time == 0) {
 				proc_object_command(obj);
 				obj->cmd = c_none;
 			}
+			else
+				obj->consumed_time--;
 		}
 	}
 }
@@ -406,7 +408,8 @@ void execute_build_command()
 		OBJECT* obj = objectPool[o].obj;
 		// DORMITORY, GARAGE, BARRACKS, SHELTER, ARENA, FACTORY
 		if (obj->unit >= DORMITORY && obj->unit <= FACTORY && obj->consumed_time > 0) {
-			if (--obj->consumed_time == 0) {
+			if (obj->consumed_time > 0) {
+				obj->consumed_time--;
 				// proc_build_command(obj);
 				// nothing
 				;
